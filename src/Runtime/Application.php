@@ -4,6 +4,7 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
+use Diana\Drivers\Interfaces\RoutingDriver;
 use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
@@ -29,40 +30,35 @@ class Application extends Obj implements Runnable
      */
     protected Request $request;
 
-    protected Router $router;
+    protected RoutingDriver $router;
 
-    protected array $drivers = [];
-
-    protected Bag $packages;
+    protected array $packages = [];
 
     protected function __construct(private string $path, protected ClassLoader $classLoader)
     {
         $this->setExceptionHandler();
 
-        $this->loadMeta();
-        $this->router = new Router();
-
-        $this->packages = new Bag();
-        foreach ($this->meta->packages as $class)
-            $this->loadPackage($class);
-
-        foreach ($this->meta->drivers as $interface => $driver)
-            $this->drivers[$interface] = new $driver;
+        $this->startRuntime($this);
 
         $this->register();
     }
 
-    public function loadPackage(string $class)
+    public function loadPackage(string $class): void
     {
         if (!$class::getInstance())
-            $this->packages->$class = $class::make($this, $this->classLoader);
+            $this->packages[$class] = $class::make($this, $this->classLoader);
     }
 
     public function register(): void
     {
+        // register the drivers
+        $this->router = $this->meta->drivers[RoutingDriver::class]::make();
+
+        // register the packages
         foreach ($this->packages as $package)
             $package->register();
 
+        // boot the application
         $this->boot();
     }
 
@@ -74,20 +70,24 @@ class Application extends Obj implements Runnable
 
     private function setExceptionHandler(): void
     {
-        set_exception_handler(function ($error) {
-            return Exception::handleException($error);
-        });
+        $whoops = new \Whoops\Run;
+        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+        $whoops->register();
 
-        register_shutdown_function(function () {
-            if ($error = error_get_last()) {
-                ob_end_clean();
-                FatalCodeException::throw ($error['message'], $error["type"], 0, $error["file"], $error["line"]);
-            }
-        });
+        // set_exception_handler(function ($error) {
+        //     return Exception::handleException($error);
+        // });
 
-        set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-            CodeException::throw ($errstr, $errno, 0, $errfile, $errline);
-        });
+        // register_shutdown_function(function () {
+        //     if ($error = error_get_last()) {
+        //         ob_end_clean();
+        //         FatalCodeException::throw ($error['message'], $error["type"], 0, $error["file"], $error["line"]);
+        //     }
+        // });
+
+        // set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+        //     CodeException::throw ($errstr, $errno, 0, $errfile, $errline);
+        // });
     }
 
     /**

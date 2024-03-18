@@ -14,14 +14,11 @@ abstract class Package extends Obj implements Runnable
 {
     use Singleton, Runtime;
 
-    public function __construct(private Application $app, protected ClassLoader $classLoader)
+    public function __construct($app, protected ClassLoader $classLoader)
     {
         $this->path = dirname($classLoader->findFile($this::class), 2);
 
-        $this->loadMeta();
-
-        foreach ($this->meta->packages as $class)
-            $this->app->loadPackage($class);
+        $this->startRuntime($app);
     }
 
     public function register(): void

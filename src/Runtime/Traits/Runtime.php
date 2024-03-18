@@ -2,6 +2,7 @@
 
 namespace Diana\Runtime\Traits;
 
+use Diana\Runtime\Application;
 use Diana\Support\Bag;
 use Composer\Autoload\ClassLoader;
 
@@ -15,9 +16,12 @@ trait Runtime
 
     protected ClassLoader $classLoader;
 
-    protected function loadMeta()
+    private function startRuntime(Application $app)
     {
         $this->meta = new Bag(include ($this->getPath() . DIRECTORY_SEPARATOR . 'meta.php'));
+
+        foreach ($this->meta->packages as $class)
+            $app->loadPackage($class);
     }
 
     /**
