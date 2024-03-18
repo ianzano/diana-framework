@@ -10,6 +10,7 @@ use Diana\IO\Request;
 use Diana\IO\Response;
 use Diana\Routing\Router;
 use Diana\Runtime\Exceptions\CodeException;
+use Diana\Runtime\Exceptions\EnvironmentException;
 use Diana\Runtime\Exceptions\Exception;
 use Diana\Runtime\Exceptions\FatalCodeException;
 
@@ -51,7 +52,7 @@ class Application extends Obj implements Runnable
 
     public function register(): void
     {
-        // register the drivers
+        // TODO: register the drivers
         $this->router = $this->meta->drivers[RoutingDriver::class]::make();
 
         // register the packages
@@ -70,6 +71,19 @@ class Application extends Obj implements Runnable
 
     private function setExceptionHandler(): void
     {
+        // TODO: clean up
+        error_reporting(E_ALL);
+        ini_set('display_errors', true ? 'On' : 'Off');
+        ini_set('log_errors', 'On');
+        ini_set('error_log', $this->getPath() . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'error.log');
+        ini_set('access_log', $this->getPath() . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'access.log');
+        ini_set('date.timezone', 'Europe/Berlin');
+
+        ini_set('xdebug.var_display_max_depth', 10);
+        ini_set('xdebug.var_display_max_children', 256);
+        ini_set('xdebug.var_display_max_data', 1024);
+        //ini_set('xdebug.max_nesting_level', 9999);
+
         $whoops = new \Whoops\Run;
         $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
         $whoops->register();
