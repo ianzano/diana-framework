@@ -23,4 +23,12 @@ trait Singleton
     {
         return static::$instance;
     }
+
+    public static function getInstanceOrMake(): ?static
+    {
+        if (!static::$instance)
+            static::$instance = parent::make(...func_get_args());
+
+        return static::$instance;
+    }
 }

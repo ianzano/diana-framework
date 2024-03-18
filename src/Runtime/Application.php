@@ -2,6 +2,9 @@
 
 namespace Diana\Runtime;
 
+use Composer\Autoload\ClassLoader;
+
+use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
 use Diana\Routing\Router;
@@ -9,15 +12,17 @@ use Diana\Runtime\Exceptions\CodeException;
 use Diana\Runtime\Exceptions\Exception;
 use Diana\Runtime\Exceptions\FatalCodeException;
 
+use Diana\Runtime\Traits\Runtime;
 use Diana\Runtime\Traits\Singleton;
 use Diana\Support\Bag;
 use Diana\Support\Debug;
 use Diana\Support\File;
 use Diana\Support\Obj;
+use SamplePackage;
 
-class Application extends Obj
+class Application extends Obj implements Runnable
 {
-    use Singleton;
+    use Singleton, Runtime;
 
     /**
      * The current request.
@@ -28,40 +33,50 @@ class Application extends Obj
 
     protected array $drivers = [];
 
-    protected Bag $config;
-
     protected Bag $packages;
 
-    protected function __construct(protected string $path)
+    protected function __construct(private string $path, protected ClassLoader $classLoader)
     {
         $this->setExceptionHandler();
 
-        $this->loadConfigs('config');
-        $this->loadDrivers();
+        $this->load();
+    }
 
+    public function load(): void
+    {
+        $this->loadMeta();
         $this->router = new Router();
 
-        $this->loadPackages();
-    }
-
-    private function loadDrivers()
-    {
-        foreach ($this->config->meta->drivers as $interface => $driver) {
-            $this->drivers[$interface] = new $driver;
-        }
-    }
-
-    private function loadPackages()
-    {
         $this->packages = new Bag();
-        foreach ($this->config->meta->packages as $package) {
-            $this->packages[$package] = new $package;
-            $this->packages[$package]->register(); // TODO: Dependency injection here
-        }
+        foreach ($this->meta->packages as $class)
+            $this->loadPackage($class);
 
-        foreach ($this->config->meta->packages as $package) {
-            $this->packages[$package]->boot(); // TODO: Dependency injection here
+        foreach ($this->meta->drivers as $interface => $driver)
+            $this->drivers[$interface] = new $driver;
+
+        $this->register();
+    }
+
+    public function loadPackage(string $class)
+    {
+        if (!$class::getInstance()) {
+            $this->packages->$class = $class::make($this, $this->classLoader);
+            $this->packages->$class->load();
         }
+    }
+
+    public function register(): void
+    {
+        foreach ($this->packages as $package)
+            $package->register();
+
+        $this->boot();
+    }
+
+    public function boot(): void
+    {
+        foreach ($this->packages as $package)
+            $package->boot();
     }
 
     private function setExceptionHandler(): void
@@ -80,26 +95,6 @@ class Application extends Obj
         set_error_handler(function ($errno, $errstr, $errfile, $errline) {
             CodeException::throw ($errstr, $errno, 0, $errfile, $errline);
         });
-    }
-
-    private function loadConfigs($directory)
-    {
-        $this->config = new Bag();
-        foreach (array_diff(scandir($this->getPath() . DIRECTORY_SEPARATOR . $directory), ['.', '..']) as $file) {
-            if (!str_ends_with($file, '.php'))
-                continue;
-
-            $this->config[substr($file, 0, -4)] = include ($this->getPath() . DIRECTORY_SEPARATOR . $directory . DIRECTORY_SEPARATOR . $file);
-        }
-    }
-
-    /**
-     * Gets the absolute path to the project.
-     * @return string
-     */
-    public function getPath(): string
-    {
-        return $this->path;
     }
 
     /**
