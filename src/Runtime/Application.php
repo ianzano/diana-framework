@@ -39,11 +39,6 @@ class Application extends Obj implements Runnable
     {
         $this->setExceptionHandler();
 
-        $this->load();
-    }
-
-    public function load(): void
-    {
         $this->loadMeta();
         $this->router = new Router();
 
@@ -59,10 +54,8 @@ class Application extends Obj implements Runnable
 
     public function loadPackage(string $class)
     {
-        if (!$class::getInstance()) {
+        if (!$class::getInstance())
             $this->packages->$class = $class::make($this, $this->classLoader);
-            $this->packages->$class->load();
-        }
     }
 
     public function register(): void

@@ -17,10 +17,7 @@ abstract class Package extends Obj implements Runnable
     public function __construct(private Application $app, protected ClassLoader $classLoader)
     {
         $this->path = dirname($classLoader->findFile($this::class), 2);
-    }
 
-    public function load(): void
-    {
         $this->loadMeta();
 
         foreach ($this->meta->packages as $class)
