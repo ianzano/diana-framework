@@ -22,16 +22,22 @@ use Diana\Support\File;
 use Diana\Support\Obj;
 use SamplePackage;
 
+use ReflectionMethod;
+
 class Application extends Obj implements Runnable
 {
-    use Singleton, Runtime;
+    use Singleton {
+        make as makeSingleton;
+    }
+
+    use Runtime;
 
     /**
      * The current request.
      */
     protected Request $request;
 
-    protected RoutingDriver $router;
+    protected array $drivers = [];
 
     protected array $packages = [];
 
@@ -40,8 +46,13 @@ class Application extends Obj implements Runnable
         $this->setExceptionHandler();
 
         $this->startRuntime($this);
+    }
 
-        $this->register();
+    public static function make(): static
+    {
+        $app = self::makeSingleton(...func_get_args());
+        $app->register(); // start the lifecycle OUTSIDE of the constructor
+        return $app;
     }
 
     public function loadPackage(string $class): void
@@ -53,11 +64,11 @@ class Application extends Obj implements Runnable
     public function register(): void
     {
         // TODO: register the drivers
-        $this->router = $this->meta->drivers[RoutingDriver::class]::make();
+        $this->drivers[RoutingDriver::class] = $this->meta->drivers[RoutingDriver::class]::make();
 
         // register the packages
         foreach ($this->packages as $package)
-            $package->register();
+            DependencyInjector::inject($package, 'register');
 
         // boot the application
         $this->boot();
@@ -66,7 +77,7 @@ class Application extends Obj implements Runnable
     public function boot(): void
     {
         foreach ($this->packages as $package)
-            $package->boot();
+            DependencyInjector::inject($package, 'boot');
     }
 
     private function setExceptionHandler(): void
@@ -102,6 +113,11 @@ class Application extends Obj implements Runnable
         // set_error_handler(function ($errno, $errstr, $errfile, $errline) {
         //     CodeException::throw ($errstr, $errno, 0, $errfile, $errline);
         // });
+    }
+
+    public function getDriver(string $driver)
+    {
+        return $this->drivers[$driver];
     }
 
     /**

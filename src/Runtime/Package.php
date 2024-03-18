@@ -21,15 +21,6 @@ abstract class Package extends Obj implements Runnable
         $this->startRuntime($app);
     }
 
-    public function register(): void
-    {
-    }
-
-    public function boot(): void
-    {
-
-    }
-
     public function getPath(): string
     {
         return $this->path;

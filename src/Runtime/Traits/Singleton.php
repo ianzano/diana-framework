@@ -2,12 +2,13 @@
 
 namespace Diana\Runtime\Traits;
 
+use Diana\Runtime\Application;
 use Diana\Runtime\Exceptions\EnvironmentException;
 use Diana\Support\Debug;
 
 trait Singleton
 {
-    protected static ?self $instance = null;
+    protected static $instance;
 
     public static function make(): static
     {
