@@ -1,0 +1,27 @@
+{
+    "name": "diana/framework",
+    "version": "dev-master",
+    "description": "a php framework aiming for simplicity and clean syntax",
+    "keywords": [
+        "diana",
+        "framework",
+        "php"
+    ],
+    "type": "library",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Diana\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Antonio Ianzano",
+            "email": "ianzanoan@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.3"
+    }
+}
