@@ -2,16 +2,10 @@
 
 namespace Diana\Runtime;
 
-use Composer\Autoload\ClassLoader;
-
-use Diana\Interfaces\Runnable;
-use Diana\Runtime\Application;
 use Diana\Runtime\Traits\Runtime;
-use Diana\Runtime\Traits\Singleton;
-use Diana\Support\Blueprints\Driver;
 use Diana\Support\Obj;
 
-abstract class Package extends Obj implements Runnable
+abstract class Package extends Obj
 {
     use Runtime;
 
@@ -19,15 +13,15 @@ abstract class Package extends Obj implements Runnable
     {
     }
 
-    public function performRegister()
+    public function performRegister(): void
     {
         DependencyInjector::inject($this, 'register');
     }
 
-    public function performBoot()
+    public function performBoot(): void
     {
         DependencyInjector::inject($this, 'boot');
-        $this->booted = true;
+        $this->hasBooted = true;
     }
 
     public function getPath(): string

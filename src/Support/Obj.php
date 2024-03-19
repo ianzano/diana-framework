@@ -2,13 +2,9 @@
 
 namespace Diana\Support;
 
-use Diana\Interfaces\Instantiable;
 use Diana\Interfaces\Serializable;
 
-use Error as PHPError;
-use Exception as PHPException;
-
-use Diana\Runtime\Exceptions\Exception;
+use Exception, Error;
 
 use stdClass as PHPObj;
 
@@ -40,11 +36,6 @@ class Obj extends PHPObj implements Serializable
      */
     public final function __toString(): string
     {
-        try {
-            return (string) $this->toString();
-        } catch (PHPException | PHPError $e) {
-            Exception::throw($e);
-            return '';
-        }
+        return (string) $this->toString();
     }
 }

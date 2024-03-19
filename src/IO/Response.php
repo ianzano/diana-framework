@@ -25,7 +25,7 @@ class Response extends Obj
         return $this->response;
     }
 
-    public function set($response)
+    public function set($response): void
     {
         $this->response = $response;
     }

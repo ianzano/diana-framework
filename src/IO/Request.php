@@ -10,10 +10,10 @@ class Request extends Obj
 {
     use Headers;
 
-    protected string $resource = '';
-    protected string $route = '';
-    protected string $host = '';
-    protected string $query = '';
+    protected string $resource;
+    protected string $route;
+    protected string $host;
+    protected string $query;
     protected string $protocol;
 
     public function __construct(
@@ -43,7 +43,8 @@ class Request extends Obj
             }
 
             $url = substr($url, 0, $pos);
-        }
+        } else
+            $this->query = '';
 
         $this->route = $url ?: $_SERVER["REQUEST_URI"];
 
@@ -68,27 +69,27 @@ class Request extends Obj
         return new Request($protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD'], $headers);
     }
 
-    public function getProtocol()
+    public function getProtocol(): string
     {
         return $this->protocol;
     }
 
-    public function getHost()
+    public function getHost(): string
     {
         return $this->host;
     }
 
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->query;
     }
 
-    public function getRoute()
+    public function getRoute(): string
     {
         return $this->route;
     }

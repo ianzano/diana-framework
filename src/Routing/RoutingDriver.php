@@ -5,7 +5,6 @@ namespace Diana\Routing;
 use ReflectionClass, ReflectionMethod;
 
 use Diana\IO\Request;
-use Diana\Runtime\Traits\Singleton;
 use Diana\Support\Blueprints\Driver;
 use Diana\Routing\Attributes\Delete;
 use Diana\Routing\Attributes\Get;
@@ -29,7 +28,7 @@ class RoutingDriver extends Driver implements Router
     {
     }
 
-    public function loadRoutes($controllers): void
+    public function loadRoutes(array $controllers): void
     {
         foreach (self::$methodMap as $class => $method)
             $this->routes[$method] = [];

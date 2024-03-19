@@ -16,40 +16,40 @@ class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializa
      * The bag content.
      * @var mixed
      */
-    public $attributes;
+    public array $attributes;
 
-    public function __construct($array = [])
+    public function __construct(self|array $array = [])
     {
-        if (is_a($array, Bag::class))
+        if (is_a($array, self::class))
             $this->attributes = $array->attributes;
         else
             $this->attributes = (array) $array;
 
         foreach ($this->attributes as &$attribute) {
             if (is_array($attribute) || is_a($attribute, \stdClass::class))
-                $attribute = new Bag($attribute);
+                $attribute = new static($attribute);
         }
     }
 
-    public function first()
+    public function first(): mixed
     {
         $first = array_key_first($this->attributes);
         return $first ? $this->attributes[$first] : null;
     }
 
-    public function flat()
+    public function flat(): static
     {
-        return new Bag(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($this->attributes)), true));
+        return new static(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($this->attributes)), true));
     }
 
-    public function indexOf($value = null)
+    public function indexOf(string $value = null): bool|int|string
     {
         return array_search($value, $this->attributes);
     }
 
-    public function map(callable $callback)
+    public function map(callable $callback): static
     {
-        $result = bag();
+        $result = new static();
         foreach ($this->attributes as $key => $value)
             $result[$key] = $callback($value, $key, $this->attributes);
 
@@ -61,12 +61,12 @@ class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializa
         return json_encode($this);
     }
 
-    private function bagIfBaggage($value)
+    private function bagIfBaggage(mixed $value): mixed
     {
         return is_array($value) ? new Bag($value) : $value;
     }
 
-    public function offsetSet($name, $value): void
+    public function offsetSet(mixed $name, mixed $value): void
     {
         $value = $this->bagIfBaggage($value);
 
@@ -76,27 +76,27 @@ class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializa
             $this->attributes[] = $value;
     }
 
-    public function offsetExists($name): bool
+    public function offsetExists(mixed $name): bool
     {
         return isset ($this->attributes[$name]);
     }
 
-    public function offsetUnset($name): void
+    public function offsetUnset(mixed $name): void
     {
         unset($this->attributes[$name]);
     }
 
-    public function offsetGet($name): mixed
+    public function offsetGet(mixed $name): mixed
     {
         return @$this->attributes[$name];
     }
 
-    public function __set($name, $value): void
+    public function __set(mixed $name, mixed $value): void
     {
         $this->attributes[$name] = $value;
     }
 
-    public function __get($name): mixed
+    public function __get(mixed $name): mixed
     {
         return $this->attributes[$name] ?? null;
     }

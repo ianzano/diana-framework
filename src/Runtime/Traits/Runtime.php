@@ -11,9 +11,9 @@ trait Runtime
 {
     private string $path;
 
-    protected Bag $config;
+    protected Bag $config; // TODO: Config
 
-    private bool $booted = false;
+    private bool $hasBooted = false;
 
     /**
      * Gets the absolute path to the project.
@@ -24,8 +24,8 @@ trait Runtime
         return $this->path;
     }
 
-    public function isBooted(): bool
+    public function hasBooted(): bool
     {
-        return $this->booted;
+        return $this->hasBooted;
     }
 }

@@ -4,33 +4,21 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
-use Diana\Drivers\Router;
-use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
 
-use Diana\Runtime\Exceptions\RuntimeException;
 use Diana\Runtime\Traits\Runtime;
-use Diana\Runtime\Traits\Singleton;
 use Diana\Support\Bag;
 use Diana\Support\Blueprints\Driver;
-use Diana\Support\Debug;
-use Diana\Support\File;
 use Diana\Support\Obj;
-use SamplePackage;
 
-use ReflectionMethod;
+use Diana\Routing\Router;
 
-class Application extends Obj implements Runnable
+class Application extends Obj
 {
     use Runtime;
 
     public static $instance;
-
-    /**
-     * The current request.
-     */
-    protected Request $request;
 
     protected array $drivers = [];
 
@@ -59,8 +47,7 @@ class Application extends Obj implements Runnable
             $this->packages[$class] = new $class(dirname($this->classLoader->findFile($class), 2), $this);
             $this->packages[$class]->performRegister();
 
-
-            if (!$this->packages[$class]->isBooted() && $this->booted)
+            if ($this->hasBooted())
                 $this->packages[$class]->performBoot();
         }
     }
@@ -86,7 +73,12 @@ class Application extends Obj implements Runnable
         foreach ($this->packages as $package)
             $package->performBoot();
 
-        $this->booted = true;
+        $this->hasBooted = true;
+    }
+
+    public function hasBooted(): bool
+    {
+        return $this->hasBooted;
     }
 
     private function setExceptionHandler(): void
@@ -124,32 +116,21 @@ class Application extends Obj implements Runnable
         // });
     }
 
-    /**
-     * Gets the current request.
-     * @return Request
-     */
-    public function getRequest(): Request
-    {
-        return $this->request;
-    }
-
     public function handleRequest(Request $request): void
     {
-        $this->request = $request;
+        // TODO: execute the middleware, on of them is RoutingMiddleware who takes care of routing
 
-        // execute the middleware, on of them is RoutingMiddleware who takes care of routing
+        $route = $this->drivers[Router::class]->findRoute($request);
 
-        // $route = $this->drivers[Router::class]->findRoute($request);
+        if (!$route) {
+            (new Response("404"))->emit();
+            return;
+        }
 
-        // if (!$route) {
-        //     Response::make("404")->emit();
-        //     return;
-        // }
-
-        // $result = (new $route['controller']())->{$route['method']}();
+        $result = (new $route['controller']())->{$route['method']}();
 
         // TODO: Fire up the router, pass it the request and let it generate a response which then is emitted
-        (new Response('zdz'))->emit();
+        (new Response($result))->emit();
     }
 
     public function registerDriver(string $driverName, Driver $driver): void
@@ -162,12 +143,12 @@ class Application extends Obj implements Runnable
         return $this->drivers[$driverName];
     }
 
-    public function getControllers()
+    public function getControllers(): array
     {
         return $this->controllers;
     }
 
-    public static function getInstance()
+    public static function getInstance(): static
     {
         return self::$instance;
     }

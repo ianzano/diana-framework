@@ -8,7 +8,7 @@ trait Headers
 {
     protected Bag $headers;
 
-    public function setHeader($header, mixed $value = null)
+    public function setHeader(string $header, mixed $value = null): void
     {
         if (!$value)
             $this->headers = new Bag($header);
@@ -16,7 +16,7 @@ trait Headers
             $this->headers[$header] = $value;
     }
 
-    public function getHeader($header = null)
+    public function getHeader(string $header = null): mixed
     {
         return $header ? $this->header[$header] : $this->header;
     }
