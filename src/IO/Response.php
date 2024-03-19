@@ -10,7 +10,7 @@ class Response extends Obj
 {
     use Headers;
 
-    public function __construct(protected string $response = "", array|Bag $headers = [])
+    public function __construct(protected ?string $response = "", array|Bag $headers = [])
     {
         $this->headers = new Bag($headers);
     }

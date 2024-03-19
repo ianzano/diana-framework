@@ -10,7 +10,7 @@ use ReflectionMethod;
 
 class DependencyInjector
 {
-    public static function inject(mixed $object, string $method): mixed
+    private static function buildParams(object|string $object, string $method): array
     {
         $reflection = new ReflectionMethod($object, $method);
         $params = [];
@@ -24,6 +24,16 @@ class DependencyInjector
                 $params[] = $dependency::getInstance();
         }
 
-        return $object->$method(...$params);
+        return $params;
+    }
+
+    public static function inject(object $object, string $method): mixed
+    {
+        return $object->$method(...self::buildParams($object, $method));
+    }
+
+    public static function injectConstructor(string $class): mixed
+    {
+        return new $class(...self::buildParams($class, '__construct'));
     }
 }

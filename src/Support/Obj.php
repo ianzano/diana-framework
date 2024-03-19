@@ -18,10 +18,8 @@ class Obj extends PHPObj implements Instantiable, Serializable
 {
     /**
      * Factory function to construct an object. Will defaultly call the constructor.
-     * @param string
-     * @return object
      */
-    public static function make(): static
+    public static function make(): Instantiable
     {
         return new static(...func_get_args());
     }

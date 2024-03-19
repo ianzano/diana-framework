@@ -20,8 +20,13 @@ trait Runtime
     {
         $this->meta = new Bag(include ($this->getPath() . DIRECTORY_SEPARATOR . 'meta.php'));
 
-        foreach ($this->meta->packages as $class)
-            $app->loadPackage($class);
+        if ($this->meta->packages)
+            foreach ($this->meta->packages as $class)
+                $app->loadPackage($class);
+
+        if ($this->meta->controllers)
+            foreach ($this->meta->controllers as $controller)
+                $app->addController($controller);
     }
 
     /**

@@ -4,15 +4,10 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
-use Diana\Drivers\Interfaces\RoutingDriver;
+use Diana\Routing\RoutingInterface;
 use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
-use Diana\Routing\Router;
-use Diana\Runtime\Exceptions\CodeException;
-use Diana\Runtime\Exceptions\EnvironmentException;
-use Diana\Runtime\Exceptions\Exception;
-use Diana\Runtime\Exceptions\FatalCodeException;
 
 use Diana\Runtime\Traits\Runtime;
 use Diana\Runtime\Traits\Singleton;
@@ -41,6 +36,8 @@ class Application extends Obj implements Runnable
 
     protected array $packages = [];
 
+    protected array $controllers = [];
+
     protected function __construct(private string $path, protected ClassLoader $classLoader)
     {
         $this->setExceptionHandler();
@@ -61,10 +58,16 @@ class Application extends Obj implements Runnable
             $this->packages[$class] = $class::make($this, $this->classLoader);
     }
 
+    public function addController(string $controller): void
+    {
+        if (!in_array($controller, $this->controllers))
+            $this->controllers[] = $controller;
+    }
+
     public function register(): void
     {
         // TODO: register the drivers
-        $this->drivers[RoutingDriver::class] = $this->meta->drivers[RoutingDriver::class]::make();
+        $this->drivers[RoutingInterface::class] = $this->meta->drivers[RoutingInterface::class]::make();
 
         // register the packages
         foreach ($this->packages as $package)
@@ -76,6 +79,8 @@ class Application extends Obj implements Runnable
 
     public function boot(): void
     {
+        $this->drivers[RoutingInterface::class]->loadRoutes($this->controllers);
+
         foreach ($this->packages as $package)
             DependencyInjector::inject($package, 'boot');
     }
@@ -133,7 +138,11 @@ class Application extends Obj implements Runnable
     {
         $this->request = $request;
 
+        $route = $this->drivers[RoutingInterface::class]->findRoute($request);
+
+        $result = (new $route['controller']())->{$route['method']}();
+
         // TODO: Fire up the router, pass it the request and let it generate a response which then is emitted
-        Response::make('test')->emit();
+        Response::make($result)->emit();
     }
 }
