@@ -11,7 +11,7 @@ trait Singleton
 {
     protected static $instance;
 
-    public static function make(): static
+    public static function make(): self
     {
         if (static::$instance)
             throw new RuntimeException('An instance of ' . static::class . ' does already exist.');
@@ -21,12 +21,12 @@ trait Singleton
         return static::$instance;
     }
 
-    public static function getInstance(): ?static
+    public static function getInstance(): ?self
     {
         return static::$instance;
     }
 
-    public static function getInstanceOrMake(): ?static
+    public static function getInstanceOrMake(): ?self
     {
         if (!static::$instance)
             static::$instance = parent::make(...func_get_args());

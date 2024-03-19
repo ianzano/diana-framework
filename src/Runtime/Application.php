@@ -44,6 +44,8 @@ class Application extends Obj implements Runnable
     {
         $this->setExceptionHandler();
 
+        $this->registerPackage(\AppPackage::class);
+
         $this->startRuntime($this);
     }
 
@@ -54,7 +56,7 @@ class Application extends Obj implements Runnable
         return $app;
     }
 
-    public function registerPackages(...$classes): void
+    public function registerPackage(...$classes): void
     {
         foreach (Bag::make($classes)->flat() as $class) {
             $this->packages[$class] = $class::getInstanceOrMake($this, $this->classLoader);
@@ -67,7 +69,7 @@ class Application extends Obj implements Runnable
         }
     }
 
-    public function registerControllers(...$controllers): void
+    public function registerController(...$controllers): void
     {
         foreach (Bag::make($controllers)->flat() as $controller) {
             if (!in_array($controller, $this->controllers))
@@ -161,12 +163,6 @@ class Application extends Obj implements Runnable
     public function registerDriver(string $driverName, Driver $driver): void
     {
         $this->drivers[$driverName] = $driver;
-    }
-
-    public function registerDrivers(array $drivers): void
-    {
-        foreach ($drivers as $driverName => $driver)
-            $this->registerDriver($driverName, $driver);
     }
 
     public function getDriver(string $driverName): Driver

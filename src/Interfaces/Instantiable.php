@@ -8,6 +8,6 @@ interface Instantiable
     /**
      * Factory function to construct the object.
      */
-    public static function make(): static;
+    public static function make(): self;
 
 }

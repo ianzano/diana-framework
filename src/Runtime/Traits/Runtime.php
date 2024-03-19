@@ -11,8 +11,6 @@ trait Runtime
 {
     private string $path;
 
-    protected Bag $meta;
-
     protected Bag $config;
 
     private bool $registered = false;
@@ -22,13 +20,6 @@ trait Runtime
 
     private function startRuntime(Application $app)
     {
-        $this->meta = new Bag(@include ($this->getPath() . DIRECTORY_SEPARATOR . 'meta.php'));
-
-        if ($this->meta->packages)
-            $app->registerPackages($this->meta->packages);
-
-        if ($this->meta->controllers)
-            $app->registerControllers($this->meta->controllers);
     }
 
     /**

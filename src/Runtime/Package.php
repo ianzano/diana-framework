@@ -24,22 +24,17 @@ abstract class Package extends Obj implements Runnable
 
     public function registerPackage(string ...$classes): void
     {
-        $this->app->registerPackages(...$classes);
+        $this->app->registerPackage(...$classes);
     }
 
-    public function registerControllers(string ...$controllers): void
+    public function registerController(string ...$controllers): void
     {
-        $this->app->registerControllers(...$controllers);
+        $this->app->registerController(...$controllers);
     }
 
     public function registerDriver(string $driverName, Driver $driver): void
     {
         $this->app->registerDriver($driverName, $driver);
-    }
-
-    public function registerDrivers(array $drivers): void
-    {
-        $this->app->registerDrivers($drivers);
     }
 
     public function getPath(): string
