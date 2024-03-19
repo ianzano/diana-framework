@@ -1,18 +1,17 @@
 <?php
 
-namespace Diana\Support\Packages\Routing;
+namespace Diana\Routing;
 
 use ReflectionClass, ReflectionMethod;
 
 use Diana\IO\Request;
 use Diana\Runtime\Traits\Singleton;
 use Diana\Support\Blueprints\Driver;
-use Diana\Support\Packages\Routing\Drivers\Router;
-use Diana\Support\Packages\Routing\Attributes\Delete;
-use Diana\Support\Packages\Routing\Attributes\Get;
-use Diana\Support\Packages\Routing\Attributes\Patch;
-use Diana\Support\Packages\Routing\Attributes\Post;
-use Diana\Support\Packages\Routing\Attributes\Put;
+use Diana\Routing\Attributes\Delete;
+use Diana\Routing\Attributes\Get;
+use Diana\Routing\Attributes\Patch;
+use Diana\Routing\Attributes\Post;
+use Diana\Routing\Attributes\Put;
 
 class RoutingDriver extends Driver implements Router
 {

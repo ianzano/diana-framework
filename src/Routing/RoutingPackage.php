@@ -1,12 +1,11 @@
 <?php
 
-namespace Diana\Support\Packages\Routing;
+namespace Diana\Routing;
 
 use Diana\Interfaces\Runnable;
 use Diana\Runtime\Application;
 use Diana\Runtime\Package;
-use Diana\Support\Debug;
-use Diana\Support\Packages\Routing\Drivers\Router;
+use Diana\Routing\Router;
 
 class RoutingPackage extends Package implements Runnable
 {

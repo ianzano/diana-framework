@@ -1,6 +1,6 @@
 <?php
 
-namespace Diana\Support\Packages\Routing\Attributes;
+namespace Diana\Routing\Attributes;
 
 abstract class Route
 {

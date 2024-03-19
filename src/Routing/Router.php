@@ -1,6 +1,6 @@
 <?php
 
-namespace Diana\Support\Packages\Routing\Drivers;
+namespace Diana\Routing;
 
 use Diana\IO\Request;
 

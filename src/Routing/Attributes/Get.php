@@ -1,10 +1,10 @@
 <?php
 
-namespace Diana\Support\Packages\Routing\Attributes;
+namespace Diana\Routing\Attributes;
 
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-class Put extends Route
+class Get extends Route
 {
 }
