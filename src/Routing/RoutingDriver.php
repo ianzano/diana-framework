@@ -15,8 +15,6 @@ use Diana\Routing\Attributes\Put;
 
 class RoutingDriver extends Driver implements Router
 {
-    use Singleton;
-
     private static $methodMap = [
         Delete::class => "DELETE",
         Get::class => "GET",

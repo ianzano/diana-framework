@@ -65,7 +65,7 @@ class Request extends Obj
 
         $protocol = strtolower(strtok($_SERVER['SERVER_PROTOCOL'], '/'));
 
-        return Request::make($protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD'], $headers);
+        return new Request($protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD'], $headers);
     }
 
     public function getProtocol()

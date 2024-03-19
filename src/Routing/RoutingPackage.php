@@ -6,6 +6,7 @@ use Diana\Interfaces\Runnable;
 use Diana\Runtime\Application;
 use Diana\Runtime\Package;
 use Diana\Routing\Router;
+use Diana\Support\Debug;
 
 class RoutingPackage extends Package implements Runnable
 {

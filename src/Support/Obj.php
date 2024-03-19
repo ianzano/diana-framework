@@ -12,16 +12,8 @@ use Diana\Runtime\Exceptions\Exception;
 
 use stdClass as PHPObj;
 
-class Obj extends PHPObj implements Instantiable, Serializable
+class Obj extends PHPObj implements Serializable
 {
-    /**
-     * Factory function to construct an object. Will defaultly call the constructor.
-     */
-    public static function make(): self
-    {
-        return new static(...func_get_args());
-    }
-
     /**
      * Implement a default serialization method.
      * @return string

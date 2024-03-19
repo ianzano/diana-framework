@@ -13,28 +13,21 @@ use Diana\Support\Obj;
 
 abstract class Package extends Obj implements Runnable
 {
-    use Singleton, Runtime;
+    use Runtime;
 
-    public function __construct(protected Application $app, protected ClassLoader $classLoader)
+    public function __construct(private string $path)
     {
-        $this->path = dirname($classLoader->findFile($this::class), 2);
-
-        $this->startRuntime($app);
     }
 
-    public function registerPackage(string ...$classes): void
+    public function performRegister()
     {
-        $this->app->registerPackage(...$classes);
+        DependencyInjector::inject($this, 'register');
     }
 
-    public function registerController(string ...$controllers): void
+    public function performBoot()
     {
-        $this->app->registerController(...$controllers);
-    }
-
-    public function registerDriver(string $driverName, Driver $driver): void
-    {
-        $this->app->registerDriver($driverName, $driver);
+        DependencyInjector::inject($this, 'boot');
+        $this->booted = true;
     }
 
     public function getPath(): string

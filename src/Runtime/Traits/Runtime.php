@@ -13,14 +13,7 @@ trait Runtime
 
     protected Bag $config;
 
-    private bool $registered = false;
     private bool $booted = false;
-
-    protected ClassLoader $classLoader;
-
-    private function startRuntime(Application $app)
-    {
-    }
 
     /**
      * Gets the absolute path to the project.
@@ -29,11 +22,6 @@ trait Runtime
     public function getPath(): string
     {
         return $this->path;
-    }
-
-    public function isRegistered(): bool
-    {
-        return $this->registered;
     }
 
     public function isBooted(): bool
