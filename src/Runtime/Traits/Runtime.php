@@ -5,6 +5,7 @@ namespace Diana\Runtime\Traits;
 use Diana\Runtime\Application;
 use Diana\Support\Bag;
 use Composer\Autoload\ClassLoader;
+use Diana\Support\Debug;
 
 trait Runtime
 {
@@ -14,19 +15,20 @@ trait Runtime
 
     protected Bag $config;
 
+    private bool $registered = false;
+    private bool $booted = false;
+
     protected ClassLoader $classLoader;
 
     private function startRuntime(Application $app)
     {
-        $this->meta = new Bag(include ($this->getPath() . DIRECTORY_SEPARATOR . 'meta.php'));
+        $this->meta = new Bag(@include ($this->getPath() . DIRECTORY_SEPARATOR . 'meta.php'));
 
         if ($this->meta->packages)
-            foreach ($this->meta->packages as $class)
-                $app->loadPackage($class);
+            $app->registerPackages($this->meta->packages);
 
         if ($this->meta->controllers)
-            foreach ($this->meta->controllers as $controller)
-                $app->addController($controller);
+            $app->registerControllers($this->meta->controllers);
     }
 
     /**
@@ -36,5 +38,15 @@ trait Runtime
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    public function isRegistered(): bool
+    {
+        return $this->registered;
+    }
+
+    public function isBooted(): bool
+    {
+        return $this->booted;
     }
 }

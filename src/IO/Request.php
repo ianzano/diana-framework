@@ -3,9 +3,7 @@
 namespace Diana\IO;
 
 use Diana\IO\Traits\Headers;
-use Diana\Runtime\Exceptions\EnvironmentException;
 use Diana\Support\Bag;
-use Diana\Support\Debug;
 use Diana\Support\Obj;
 
 class Request extends Obj
@@ -54,7 +52,7 @@ class Request extends Obj
         $this->headers = new Bag($headers);
     }
 
-    public static function mock()
+    public static function mock(): Request
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {

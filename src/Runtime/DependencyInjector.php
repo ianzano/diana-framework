@@ -18,10 +18,10 @@ class DependencyInjector
         foreach ($reflection->getParameters() as $param) {
             $dependency = $param->getType()->getName();
 
-            if ((new ReflectionClass($dependency))->isInterface())
-                $params[] = Application::getInstance()->getDriver($dependency);
-            else
-                $params[] = $dependency::getInstance();
+            $params[] = match (true) {
+                (new ReflectionClass($dependency))->isInterface() => Application::getInstance()->getDriver($dependency),
+                default => $dependency::getInstance()
+            };
         }
 
         return $params;

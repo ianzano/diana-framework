@@ -6,6 +6,8 @@ use ArrayAccess;
 use Countable;
 use Iterator;
 use JsonSerializable;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 
 class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializable
 {
@@ -33,6 +35,11 @@ class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializa
     {
         $first = array_key_first($this->attributes);
         return $first ? $this->attributes[$first] : null;
+    }
+
+    public function flat()
+    {
+        return new Bag(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($this->attributes)), true));
     }
 
     public function indexOf($value = null)

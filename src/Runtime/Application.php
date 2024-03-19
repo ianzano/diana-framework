@@ -4,14 +4,16 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
-use Diana\Routing\RoutingInterface;
+use Diana\Drivers\Router;
 use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
 
+use Diana\Runtime\Exceptions\RuntimeException;
 use Diana\Runtime\Traits\Runtime;
 use Diana\Runtime\Traits\Singleton;
 use Diana\Support\Bag;
+use Diana\Support\Blueprints\Driver;
 use Diana\Support\Debug;
 use Diana\Support\File;
 use Diana\Support\Obj;
@@ -52,37 +54,45 @@ class Application extends Obj implements Runnable
         return $app;
     }
 
-    public function loadPackage(string $class): void
+    public function registerPackages(...$classes): void
     {
-        if (!$class::getInstance())
-            $this->packages[$class] = $class::make($this, $this->classLoader);
+        foreach (Bag::make($classes)->flat() as $class) {
+            $this->packages[$class] = $class::getInstanceOrMake($this, $this->classLoader);
+
+            if (!$this->packages[$class]->isRegistered() && $this->registered)
+                $this->packages[$class]->register();
+
+            if (!$this->packages[$class]->isBooted() && $this->booted)
+                $this->packages[$class]->boot();
+        }
     }
 
-    public function addController(string $controller): void
+    public function registerControllers(...$controllers): void
     {
-        if (!in_array($controller, $this->controllers))
-            $this->controllers[] = $controller;
+        foreach (Bag::make($controllers)->flat() as $controller) {
+            if (!in_array($controller, $this->controllers))
+                $this->controllers[] = $controller;
+        }
     }
 
     public function register(): void
     {
-        // TODO: register the drivers
-        $this->drivers[RoutingInterface::class] = $this->meta->drivers[RoutingInterface::class]::make();
-
         // register the packages
         foreach ($this->packages as $package)
             DependencyInjector::inject($package, 'register');
 
         // boot the application
         $this->boot();
+
+        $this->registered = true;
     }
 
     public function boot(): void
     {
-        $this->drivers[RoutingInterface::class]->loadRoutes($this->controllers);
-
         foreach ($this->packages as $package)
             DependencyInjector::inject($package, 'boot');
+
+        $this->booted = true;
     }
 
     private function setExceptionHandler(): void
@@ -120,11 +130,6 @@ class Application extends Obj implements Runnable
         // });
     }
 
-    public function getDriver(string $driver)
-    {
-        return $this->drivers[$driver];
-    }
-
     /**
      * Gets the current request.
      * @return Request
@@ -138,16 +143,39 @@ class Application extends Obj implements Runnable
     {
         $this->request = $request;
 
-        $route = $this->drivers[RoutingInterface::class]->findRoute($request);
+        // execute the middleware, on of them is RoutingMiddleware who takes care of routing
 
-        if (!$route) {
-            Response::make("404")->emit();
-            return;
-        }
+        // $route = $this->drivers[Router::class]->findRoute($request);
 
-        $result = (new $route['controller']())->{$route['method']}();
+        // if (!$route) {
+        //     Response::make("404")->emit();
+        //     return;
+        // }
+
+        // $result = (new $route['controller']())->{$route['method']}();
 
         // TODO: Fire up the router, pass it the request and let it generate a response which then is emitted
-        Response::make($result)->emit();
+        Response::make('zdz')->emit();
+    }
+
+    public function registerDriver(string $driverName, Driver $driver): void
+    {
+        $this->drivers[$driverName] = $driver;
+    }
+
+    public function registerDrivers(array $drivers): void
+    {
+        foreach ($drivers as $driverName => $driver)
+            $this->registerDriver($driverName, $driver);
+    }
+
+    public function getDriver(string $driverName): Driver
+    {
+        return $this->drivers[$driverName];
+    }
+
+    public function getControllers()
+    {
+        return $this->controllers;
     }
 }

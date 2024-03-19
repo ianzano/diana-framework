@@ -5,8 +5,6 @@ namespace Diana\Support;
 use Diana\Interfaces\Instantiable;
 use Diana\Interfaces\Serializable;
 
-use Diana\Interfaces\Singleton;
-use Diana\Runtime\Exceptions\EnvironmentException;
 use Error as PHPError;
 use Exception as PHPException;
 
@@ -19,7 +17,7 @@ class Obj extends PHPObj implements Instantiable, Serializable
     /**
      * Factory function to construct an object. Will defaultly call the constructor.
      */
-    public static function make(): Instantiable
+    public static function make(): static
     {
         return new static(...func_get_args());
     }

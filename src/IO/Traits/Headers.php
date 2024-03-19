@@ -2,9 +2,7 @@
 
 namespace Diana\IO\Traits;
 
-use Diana\Runtime\Exceptions\EnvironmentException;
 use Diana\Support\Bag;
-use Diana\Support\Debug;
 
 trait Headers
 {
