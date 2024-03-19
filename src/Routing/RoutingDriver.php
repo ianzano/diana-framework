@@ -78,6 +78,7 @@ class RoutingDriver extends Obj implements RoutingInterface
                     continue 2;
             }
 
+            $route['params'] = $params;
             return $route;
         }
 

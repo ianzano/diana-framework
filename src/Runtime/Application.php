@@ -140,6 +140,11 @@ class Application extends Obj implements Runnable
 
         $route = $this->drivers[RoutingInterface::class]->findRoute($request);
 
+        if (!$route) {
+            Response::make("404")->emit();
+            return;
+        }
+
         $result = (new $route['controller']())->{$route['method']}();
 
         // TODO: Fire up the router, pass it the request and let it generate a response which then is emitted
