@@ -9,19 +9,17 @@ abstract class Package extends Obj
 {
     use Runtime;
 
-    public function __construct(private string $path)
-    {
-    }
-
-    public function performRegister(): void
-    {
-        DependencyInjector::inject($this, 'register');
-    }
 
     public function performBoot(): void
     {
-        DependencyInjector::inject($this, 'boot');
+        $this->boot();
         $this->hasBooted = true;
+    }
+
+    public function withPath($classLoader)
+    {
+        $this->path = dirname($classLoader->findFile($this::class), 2);
+        return $this;
     }
 
     public function getPath(): string

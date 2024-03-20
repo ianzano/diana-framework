@@ -5,14 +5,17 @@ namespace Diana\Routing;
 use ReflectionClass, ReflectionMethod;
 
 use Diana\IO\Request;
-use Diana\Support\Blueprints\Driver;
+use Diana\Support\Blueprints\Driver as BaseDriver;
 use Diana\Routing\Attributes\Delete;
 use Diana\Routing\Attributes\Get;
 use Diana\Routing\Attributes\Patch;
 use Diana\Routing\Attributes\Post;
 use Diana\Routing\Attributes\Put;
 
-class RoutingDriver extends Driver implements Router
+use Diana\Routing\Router as RouterContract;
+use Diana\Runtime\Application;
+
+class Driver extends BaseDriver implements RouterContract
 {
     private static $methodMap = [
         Delete::class => "DELETE",
@@ -24,16 +27,16 @@ class RoutingDriver extends Driver implements Router
 
     private array $routes = [];
 
-    public function __construct()
+    public function __construct(private Application $app)
     {
     }
 
-    public function loadRoutes(array $controllers): void
+    public function loadRoutes(): void
     {
         foreach (self::$methodMap as $class => $method)
             $this->routes[$method] = [];
 
-        foreach ($controllers as $controller) {
+        foreach ($this->app->getControllers() as $controller) {
             foreach ((new ReflectionClass($controller))->getMethods() as $method) {
                 $reflection = new ReflectionMethod($controller, $method->name);
                 foreach ($reflection->getAttributes() as $attribute) {

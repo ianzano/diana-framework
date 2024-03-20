@@ -10,17 +10,14 @@ use Diana\IO\Response;
 use Diana\Runtime\Traits\Runtime;
 use Diana\Support\Bag;
 use Diana\Support\Blueprints\Driver;
+use Diana\Support\Debug;
 use Diana\Support\Obj;
 
 use Diana\Routing\Router;
 
-class Application extends Obj
+class Application extends Container
 {
     use Runtime;
-
-    public static $instance;
-
-    protected array $drivers = [];
 
     protected array $packages = [];
 
@@ -29,13 +26,20 @@ class Application extends Obj
     protected function __construct(private string $path, protected ClassLoader $classLoader)
     {
         $this->setExceptionHandler();
+
+        static::setInstance($this);
+        $this->instance(Application::class, $this);
+        $this->instance(Container::class, $this);
+
+        $this->registerPackage(\AppPackage::class);
+
+        // boot the application
+        $this->boot();
     }
 
     public static function make(string $path, ClassLoader $classLoader): static
     {
-        self::$instance = new static($path, $classLoader);
-        self::$instance->register(); // start the lifecycle OUTSIDE of the constructor
-        return self::$instance;
+        return new static($path, $classLoader);
     }
 
     public function registerPackage(...$classes): void
@@ -44,11 +48,13 @@ class Application extends Obj
             if (in_array($class, $this->packages))
                 continue;
 
-            $this->packages[$class] = new $class(dirname($this->classLoader->findFile($class), 2), $this);
-            $this->packages[$class]->performRegister();
+            $this->packages[] = $class;
+
+            $this->singleton($class);
+            $package = $this->resolve($class)->withPath($this->classLoader);
 
             if ($this->hasBooted())
-                $this->packages[$class]->performBoot();
+                $package->performBoot();
         }
     }
 
@@ -60,18 +66,10 @@ class Application extends Obj
         }
     }
 
-    public function register(): void
-    {
-        $this->registerPackage(\AppPackage::class);
-
-        // boot the application
-        $this->boot();
-    }
-
     public function boot(): void
     {
         foreach ($this->packages as $package)
-            $package->performBoot();
+            $this->resolve($package)->performBoot();
 
         $this->hasBooted = true;
     }
@@ -120,7 +118,8 @@ class Application extends Obj
     {
         // TODO: execute the middleware, on of them is RoutingMiddleware who takes care of routing
 
-        $route = $this->drivers[Router::class]->findRoute($request);
+        $route = $this->resolve(Router::class)->findRoute($request);
+
 
         if (!$route) {
             (new Response("404"))->emit();
@@ -133,23 +132,8 @@ class Application extends Obj
         (new Response($result))->emit();
     }
 
-    public function registerDriver(string $driverName, Driver $driver): void
-    {
-        $this->drivers[$driverName] = $driver;
-    }
-
-    public function getDriver(string $driverName): Driver
-    {
-        return $this->drivers[$driverName];
-    }
-
     public function getControllers(): array
     {
         return $this->controllers;
-    }
-
-    public static function getInstance(): static
-    {
-        return self::$instance;
     }
 }
