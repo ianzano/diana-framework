@@ -1,6 +1,6 @@
 <?php
 
-namespace Diana\Runtime\Exceptions;
+namespace Diana\Exceptions;
 
 use Exception;
 

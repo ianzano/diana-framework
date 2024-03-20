@@ -2,19 +2,13 @@
 
 namespace Diana\Runtime;
 
+use Diana\Interfaces\Runnable;
 use Diana\Runtime\Traits\Runtime;
 use Diana\Support\Obj;
 
-abstract class Package extends Obj
+abstract class Package extends Obj implements Runnable
 {
     use Runtime;
-
-
-    public function performBoot(): void
-    {
-        $this->boot();
-        $this->hasBooted = true;
-    }
 
     public function withPath($classLoader)
     {

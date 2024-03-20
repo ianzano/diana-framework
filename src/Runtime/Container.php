@@ -4,7 +4,9 @@ namespace Diana\Runtime;
 
 use ArrayAccess;
 use Closure;
-use Diana\Runtime\Exceptions\BindingResolutionException;
+use Diana\Exceptions\BindingResolutionException;
+use Diana\Exceptions\CircularDependencyException;
+use Diana\Exceptions\EntryNotFoundException;
 use Exception;
 use LogicException;
 use ReflectionClass;
@@ -725,8 +727,8 @@ class Container implements ArrayAccess
      * @param  bool  $raiseEvents
      * @return mixed
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Illuminate\Contracts\Container\CircularDependencyException
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
      */
     public function resolve($abstract, $parameters = [], $raiseEvents = true)
     {
@@ -864,8 +866,8 @@ class Container implements ArrayAccess
      * @param  \Closure|string  $concrete
      * @return mixed
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \Illuminate\Contracts\Container\CircularDependencyException
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
      */
     public function build($concrete)
     {
@@ -926,7 +928,7 @@ class Container implements ArrayAccess
      * @param  \ReflectionParameter[]  $dependencies
      * @return array
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function resolveDependencies(array $dependencies)
     {
@@ -1000,7 +1002,7 @@ class Container implements ArrayAccess
      * @param  \ReflectionParameter  $parameter
      * @return mixed
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function resolvePrimitive(ReflectionParameter $parameter)
     {
@@ -1025,7 +1027,7 @@ class Container implements ArrayAccess
      * @param  \ReflectionParameter  $parameter
      * @return mixed
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function resolveClass(ReflectionParameter $parameter)
     {
@@ -1080,7 +1082,7 @@ class Container implements ArrayAccess
      * @param  string  $concrete
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function notInstantiable($concrete)
     {
@@ -1101,7 +1103,7 @@ class Container implements ArrayAccess
      * @param  \ReflectionParameter  $parameter
      * @return void
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function unresolvablePrimitive(ReflectionParameter $parameter)
     {
@@ -1394,11 +1396,8 @@ class Container implements ArrayAccess
 
     /**
      * Set the shared instance of the container.
-     *
-     * @param  \Illuminate\Contracts\Container\Container|null  $container
-     * @return \Illuminate\Contracts\Container\Container|static
      */
-    public static function setInstance(Container $container = null)
+    public static function setInstance(Container $container = null): static
     {
         return static::$instance = $container;
     }

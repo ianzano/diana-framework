@@ -18,9 +18,13 @@ class RoutingPackage extends Package
         $this->app->singleton(Router::class, Driver::class);
     }
 
-    public function boot(): void
+    public function register(): void
     {
         // TODO: Register routing middleware here
+    }
+
+    public function boot(): void
+    {
         $this->app->resolve(Router::class)->loadRoutes();
     }
 }

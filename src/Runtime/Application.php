@@ -4,8 +4,12 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
+use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
+
+use Diana\Kernel\Kernel;
+use RuntimeException;
 
 use Diana\Runtime\Traits\Runtime;
 use Diana\Support\Bag;
@@ -15,7 +19,7 @@ use Diana\Support\Obj;
 
 use Diana\Routing\Router;
 
-class Application extends Container
+class Application extends Container implements Runnable
 {
     use Runtime;
 
@@ -27,19 +31,31 @@ class Application extends Container
     {
         $this->setExceptionHandler();
 
-        static::setInstance($this);
-        $this->instance(Application::class, $this);
-        $this->instance(Container::class, $this);
-
-        $this->registerPackage(\AppPackage::class);
-
-        // boot the application
-        $this->boot();
+        $this->registerBindings();
     }
 
     public static function make(string $path, ClassLoader $classLoader): static
     {
-        return new static($path, $classLoader);
+        // initializes the application
+        $app = new static($path, $classLoader);
+
+        // initializes all packages
+        $app->registerPackage(\AppPackage::class);
+
+        // registers all packages
+        $app->performRegister($app);
+
+        // boots all packages
+        $app->performBoot($app);
+
+        return $app;
+    }
+
+    public function registerBindings(): void
+    {
+        static::setInstance($this);
+        $this->instance(Application::class, $this);
+        $this->instance(Container::class, $this);
     }
 
     public function registerPackage(...$classes): void
@@ -53,8 +69,11 @@ class Application extends Container
             $this->singleton($class);
             $package = $this->resolve($class)->withPath($this->classLoader);
 
+            if ($this->isRegistered())
+                $package->performRegister($this);
+
             if ($this->hasBooted())
-                $package->performBoot();
+                $package->performBoot($this);
         }
     }
 
@@ -66,17 +85,16 @@ class Application extends Container
         }
     }
 
+    public function register(): void
+    {
+        foreach ($this->packages as $package)
+            $this->resolve($package)->performRegister($this); // $app->call()
+    }
+
     public function boot(): void
     {
         foreach ($this->packages as $package)
-            $this->resolve($package)->performBoot();
-
-        $this->hasBooted = true;
-    }
-
-    public function hasBooted(): bool
-    {
-        return $this->hasBooted;
+            $this->resolve($package)->performBoot($this);
     }
 
     private function setExceptionHandler(): void
@@ -116,20 +134,12 @@ class Application extends Container
 
     public function handleRequest(Request $request): void
     {
-        // TODO: execute the middleware, on of them is RoutingMiddleware who takes care of routing
+        $kernel = $this->resolve(Kernel::class);
 
-        $route = $this->resolve(Router::class)->findRoute($request);
+        $response = $kernel->process($request);
+        $response->emit();
 
-
-        if (!$route) {
-            (new Response("404"))->emit();
-            return;
-        }
-
-        $result = (new $route['controller']())->{$route['method']}();
-
-        // TODO: Fire up the router, pass it the request and let it generate a response which then is emitted
-        (new Response($result))->emit();
+        // $kernel->terminate($request, $response);
     }
 
     public function getControllers(): array
