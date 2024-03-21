@@ -14,6 +14,8 @@ use Diana\Routing\Attributes\Put;
 
 use Diana\Routing\Router as RouterContract;
 use Diana\Runtime\Application;
+use Diana\Routing\Attributes\Middleware;
+use Exception;
 
 class Driver extends BaseDriver implements RouterContract
 {
@@ -39,17 +41,36 @@ class Driver extends BaseDriver implements RouterContract
         foreach ($this->app->getControllers() as $controller) {
             foreach ((new ReflectionClass($controller))->getMethods() as $method) {
                 $reflection = new ReflectionMethod($controller, $method->name);
-                foreach ($reflection->getAttributes() as $attribute) {
+                $attributes = $reflection->getAttributes();
+
+                $middleware = [];
+                foreach ($attributes as $attribute) {
+                    if ($attribute->getName() == Middleware::class)
+                        foreach ($attribute->getArguments() as $argument)
+                            $middleware[] = $argument;
+                }
+
+                foreach ($attributes as $attribute) {
+                    if (!array_key_exists($attribute->getName(), self::$methodMap))
+                        continue;
+
                     $arguments = $attribute->getArguments();
+
+                    if (empty ($arguments))
+                        throw new Exception('Route [' . $controller . '@' . $method->name . '] does not provide a path.');
 
                     $path = '/';
                     if (isset ($controller::$route))
                         $path .= trim($controller::$route, '/') . '/';
                     $path .= trim($arguments[0], '/');
 
+                    if (array_key_exists($path, $this->routes[self::$methodMap[$attribute->getName()]]))
+                        throw new Exception('Route [' . $controller . '@' . $method->name . '] tried to assign the path [' . $path . '] that has already been assigned to [' . $this->routes[self::$methodMap[$attribute->getName()]][$path]['controller'] . '@' . $this->routes[self::$methodMap[$attribute->getName()]][$path]['method'] . ']');
+
                     $this->routes[self::$methodMap[$attribute->getName()]][$path] = [
                         'controller' => $controller,
                         'method' => $method->name,
+                        'middleware' => $middleware,
                         'segments' => explode('/', trim($path, '/'))
                     ];
                 }

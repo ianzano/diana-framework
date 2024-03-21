@@ -8,7 +8,7 @@ use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 use Diana\IO\Response;
 
-use Diana\Kernel\Kernel;
+use Diana\Contracts\Kernel;
 use RuntimeException;
 
 use Diana\Runtime\Traits\Runtime;

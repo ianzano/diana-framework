@@ -2,6 +2,10 @@
 
 namespace Diana\Routing;
 
+use Closure;
+use Diana\IO\Request;
+use Diana\IO\Response;
+use Diana\Contracts\Kernel;
 use Diana\Runtime\Application;
 use Diana\Runtime\Package;
 
@@ -18,9 +22,9 @@ class RoutingPackage extends Package
         $this->app->singleton(Router::class, Driver::class);
     }
 
-    public function register(): void
+    public function register(Kernel $kernel): void
     {
-        // TODO: Register routing middleware here
+        $kernel->registerMiddleware(Middleware::class);
     }
 
     public function boot(): void
