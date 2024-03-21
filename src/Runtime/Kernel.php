@@ -3,22 +3,21 @@
 namespace Diana\Runtime;
 
 use Closure;
+use Diana\Exceptions\KernelException;
 use Diana\IO\Request;
 use Diana\IO\Response;
 use Diana\Runtime\Application;
-use Diana\Support\Blueprints\Driver as BaseDriver;
 use Diana\Contracts\Kernel as KernelContract;
 use Diana\Contracts\Middleware;
 use RuntimeException;
 
-class Kernel extends BaseDriver implements KernelContract
+class Kernel implements KernelContract
 {
     protected array $middleware = [];
 
     public function registerMiddleware(string|Closure $middleware): void
     {
         $this->middleware[] = $middleware;
-        // TODO: class_alias(Application::class, 'Dorf\Test');
     }
 
     public function __construct(private Application $app)
@@ -46,6 +45,10 @@ class Kernel extends BaseDriver implements KernelContract
         };
 
         $response = $next($request);
+
+        if (!$response)
+            throw new KernelException('No middleware has provided a response.');
+
         return $response;
 
         // $this->bootstrap();

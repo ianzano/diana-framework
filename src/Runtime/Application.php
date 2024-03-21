@@ -4,24 +4,22 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
+use Diana\Cache\Facades;
 use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
-use Diana\IO\Response;
 
 use Diana\Contracts\Kernel;
-use RuntimeException;
+use Diana\Support\Debug;
+use Diana\Support\Facades\Facade;
 
 use Diana\Runtime\Traits\Runtime;
 use Diana\Support\Bag;
-use Diana\Support\Blueprints\Driver;
-use Diana\Support\Debug;
-use Diana\Support\Obj;
-
-use Diana\Routing\Router;
 
 class Application extends Container implements Runnable
 {
     use Runtime;
+
+    const VERSION = "1.0.0";
 
     protected array $packages = [];
 
@@ -32,6 +30,13 @@ class Application extends Container implements Runnable
         $this->setExceptionHandler();
 
         $this->registerBindings();
+
+        $this->provideFacades();
+    }
+
+    protected function provideFacades()
+    {
+        $this->resolve(Facades::class)->provide();
     }
 
     public static function make(string $path, ClassLoader $classLoader): static
@@ -51,9 +56,10 @@ class Application extends Container implements Runnable
         return $app;
     }
 
-    public function registerBindings(): void
+    protected function registerBindings(): void
     {
         static::setInstance($this);
+        Facade::setApplication($this);
         $this->instance(Application::class, $this);
         $this->instance(Container::class, $this);
     }
@@ -97,7 +103,7 @@ class Application extends Container implements Runnable
             $this->resolve($package)->performBoot($this);
     }
 
-    private function setExceptionHandler(): void
+    protected function setExceptionHandler(): void
     {
         // TODO: clean up
         error_reporting(E_ALL);

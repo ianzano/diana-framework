@@ -5,7 +5,6 @@ namespace Diana\Routing;
 use ReflectionClass, ReflectionMethod;
 
 use Diana\IO\Request;
-use Diana\Support\Blueprints\Driver as BaseDriver;
 use Diana\Routing\Attributes\Delete;
 use Diana\Routing\Attributes\Get;
 use Diana\Routing\Attributes\Patch;
@@ -17,7 +16,7 @@ use Diana\Runtime\Application;
 use Diana\Routing\Attributes\Middleware;
 use Exception;
 
-class Driver extends BaseDriver implements RouterContract
+class Driver implements RouterContract
 {
     private static $methodMap = [
         Delete::class => "DELETE",

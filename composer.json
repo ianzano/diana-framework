@@ -12,7 +12,10 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Diana\\": "src/"
+            "Diana\\": [
+                "src/",
+                "src/Support/Facades/"
+            ]
         }
     },
     "authors": [
