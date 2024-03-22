@@ -34,6 +34,11 @@ class Application extends Container implements Runnable
         $this->provideFacades();
     }
 
+    public function getVersion()
+    {
+        return static::VERSION;
+    }
+
     protected function provideFacades()
     {
         $this->resolve(Facades::class)->provide();
@@ -60,8 +65,12 @@ class Application extends Container implements Runnable
     {
         static::setInstance($this);
         Facade::setApplication($this);
-        $this->instance(Application::class, $this);
-        $this->instance(Container::class, $this);
+        $this->instance('app', $this);
+
+        foreach (['app' => [Application::class, Container::class], 'kernel' => [Kernel::class]] as $key => $aliases) {
+            foreach ($aliases as $alias)
+                $this->alias($key, $alias);
+        }
     }
 
     public function registerPackage(...$classes): void
@@ -140,7 +149,7 @@ class Application extends Container implements Runnable
 
     public function handleRequest(Request $request): void
     {
-        $kernel = $this->resolve(Kernel::class);
+        $kernel = $this->resolve('kernel');
 
         $response = $kernel->process($request);
         $response->emit();
@@ -148,8 +157,13 @@ class Application extends Container implements Runnable
         // $kernel->terminate($request, $response);
     }
 
-    public function getControllers(): array
+    public function getControllers()
     {
-        return $this->controllers;
+        return new Bag($this->controllers);
+    }
+
+    public function getPackages()
+    {
+        return new Bag($this->packages);
     }
 }

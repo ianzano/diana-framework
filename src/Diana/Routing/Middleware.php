@@ -25,7 +25,7 @@ class Middleware implements MiddlewareContract
         if ($response)
             return $response;
 
-        $route = $this->app->resolve(Router::class)->findRoute($request);
+        $route = $this->app->resolve('router')->findRoute($request);
 
         if (!$route)
             return new Response("404");

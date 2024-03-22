@@ -31,6 +31,19 @@ class Bag extends Obj implements ArrayAccess, Iterator, Countable, JsonSerializa
         }
     }
 
+    public function wrap(string $pre, string $post): string
+    {
+        $result = '';
+        foreach ($this->attributes as $attribute)
+            $result .= $pre . $attribute . $post;
+        return $result;
+    }
+
+    public function join(string $separator): string
+    {
+        return join($separator, $this->attributes);
+    }
+
     public function first(): mixed
     {
         $first = array_key_first($this->attributes);

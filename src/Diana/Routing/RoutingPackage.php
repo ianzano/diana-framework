@@ -16,7 +16,8 @@ class RoutingPackage extends Package
 
     public function __construct(private Application $app)
     {
-        $this->app->singleton(Router::class, Driver::class);
+        $this->app->alias('router', Router::class);
+        $this->app->singleton('router', Driver::class);
     }
 
     public function register(Kernel $kernel): void
@@ -26,6 +27,6 @@ class RoutingPackage extends Package
 
     public function boot(): void
     {
-        $this->app->resolve(Router::class)->loadRoutes();
+        $this->app->resolve('router')->loadRoutes();
     }
 }
