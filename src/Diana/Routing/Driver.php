@@ -15,6 +15,7 @@ use Diana\Routing\Router as RouterContract;
 use Diana\Runtime\Application;
 use Diana\Routing\Attributes\Middleware;
 use Exception;
+use Diana\Support\Debug;
 
 class Driver implements RouterContract
 {
@@ -79,7 +80,8 @@ class Driver implements RouterContract
 
     public function findRoute(Request $request): ?array
     {
-        $segments = explode('/', trim($request->getRoute(), '/'));
+        $trim = trim($request->getRoute(), '/');
+        $segments = explode('/', $trim);
         $segmentCount = count($segments);
 
         $params = [];
@@ -88,11 +90,13 @@ class Driver implements RouterContract
             if ($segmentCount != count($route['segments']))
                 continue;
 
-            for ($i = 0; $i < $segmentCount; $i++) {
-                if ($route['segments'][$i][0] == ':') {
-                    $params[substr($route['segments'][$i], 1)] = $segments[$i];
-                } elseif ($route['segments'][$i] != $segments[$i])
-                    continue 2;
+            if ($trim) {
+                for ($i = 0; $i < $segmentCount; $i++) {
+                    if ($route['segments'][$i][0] == ':') {
+                        $params[substr($route['segments'][$i], 1)] = $segments[$i];
+                    } elseif ($route['segments'][$i] != $segments[$i])
+                        continue 2;
+                }
             }
 
             $route['params'] = $params;
