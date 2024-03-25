@@ -90,13 +90,11 @@ class Driver implements RouterContract
             if ($segmentCount != count($route['segments']))
                 continue;
 
-            if ($trim) {
-                for ($i = 0; $i < $segmentCount; $i++) {
-                    if ($route['segments'][$i][0] == ':') {
-                        $params[substr($route['segments'][$i], 1)] = $segments[$i];
-                    } elseif ($route['segments'][$i] != $segments[$i])
-                        continue 2;
-                }
+            for ($i = 0; $i < $segmentCount; $i++) {
+                if (isset ($route['segments'][$i][0]) && $route['segments'][$i][0] == ':') {
+                    $params[substr($route['segments'][$i], 1)] = $segments[$i];
+                } elseif ($route['segments'][$i] != $segments[$i])
+                    continue 2;
             }
 
             $route['params'] = $params;

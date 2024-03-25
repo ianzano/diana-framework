@@ -23,6 +23,8 @@
     ],
     "require": {
         "php": ">=8.3",
-        "filp/whoops": "^2.15"
+        "filp/whoops": "^2.15",
+        "illuminate/view": "^11.0",
+        "illuminate/config": "^11.0"
     }
 }
