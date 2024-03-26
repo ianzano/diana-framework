@@ -8,6 +8,8 @@ use Diana\Exceptions\BindingResolutionException;
 use Diana\Exceptions\CircularDependencyException;
 use Diana\Exceptions\EntryNotFoundException;
 use Exception;
+use Illuminate\Container\ContextualBindingBuilder;
+use Illuminate\Container\RewindableGenerator;
 use LogicException;
 use ReflectionClass;
 use ReflectionException;

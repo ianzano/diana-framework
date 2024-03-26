@@ -3,17 +3,46 @@
 namespace Diana\Rendering;
 
 use App;
+use Diana\Rendering\Engines\CompilerEngine;
+use Diana\Rendering\Engines\FileEngine;
+use Diana\Rendering\Engines\PhpEngine;
 use Diana\Runtime\Application;
 use Diana\Runtime\Package;
 
+use Illuminate\Filesystem\Filesystem;
+
 class RenderingPackage extends Package
 {
+
     public function __construct(private Application $app)
     {
-        $driver = new Driver(
-            [join(DIRECTORY_SEPARATOR, [$app->getPath(), "res"])],
-            join(DIRECTORY_SEPARATOR, [$app->getPath(), "cache", "blade"])
+        $app->terminating(static function () {
+            Component::flushCache();
+        });
+
+        $filesystem = new Filesystem;
+
+        $compiler = new Compiler(
+            $filesystem,
+            join(DIRECTORY_SEPARATOR, [$app->getPath(), "cache", "blade"]),
+            $app->getPath(),
+            false,
+            'php'
         );
+        $compiler->component('dynamic-component', DynamicComponent::class);
+
+        $resolver = new EngineResolver;
+        $resolver->register('file', fn() => new FileEngine($filesystem));
+        $resolver->register('php', fn() => new PhpEngine($filesystem));
+        $resolver->register('blade', function () use ($compiler, $filesystem) {
+            $engine = new CompilerEngine($compiler, $filesystem);
+
+            $this->app->terminating(static fn() => $engine->forgetCompiledOrNotExpired());
+
+            return $engine;
+        });
+
+        $driver = new Driver($app, $resolver, $compiler);
 
         $driver->directive("vite", function ($entry) {
             $entry = trim($entry, "\"'");

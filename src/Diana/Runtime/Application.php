@@ -166,4 +166,22 @@ class Application extends Container implements Runnable
     {
         return new Bag($this->packages);
     }
+
+
+    // TODO: BLADE
+    protected array $terminatingCallbacks = [];
+
+    public function terminating(\Closure $callback)
+    {
+        $this->terminatingCallbacks[] = $callback;
+
+        return $this;
+    }
+
+    public function terminate()
+    {
+        foreach ($this->terminatingCallbacks as $terminatingCallback) {
+            $terminatingCallback();
+        }
+    }
 }
