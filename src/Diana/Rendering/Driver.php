@@ -4,9 +4,9 @@ namespace Diana\Rendering;
 
 use Diana\Runtime\Application;
 
-use Illuminate\View\Concerns;
-
+use Diana\Support\Debug;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 
 class Driver implements Renderer
 {
@@ -26,7 +26,12 @@ class Driver implements Renderer
             // clear out the sections for any separate views that may be rendered.
             $this->renderCount++;
 
-            $engine = $this->getEngineFromPath($path);
+            try {
+                $engine = $this->getEngineFromPath($path);
+            } catch (\Exception $e) {
+                Debug::dump($path);
+                die;
+            }
 
             $contents = $engine->get($path, array_merge($this->shared, $data));
 

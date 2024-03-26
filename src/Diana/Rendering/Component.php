@@ -4,8 +4,10 @@ namespace Diana\Rendering;
 
 use Closure;
 use Diana\Runtime\Container;
+use Diana\Support\Debug;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\View\ComponentAttributeBag;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -170,26 +172,22 @@ abstract class Component
             return static::$bladeViewCache[$key];
         }
 
-        if (strlen($contents) <= PHP_MAXPATHLEN && $this->factory()->exists($contents)) {
+        // TODO: remove hardcoding of res folder
+        if (strlen($contents) <= PHP_MAXPATHLEN && file_exists(\App::getPath() . "/cache/compiled/" . $contents))
             return static::$bladeViewCache[$key] = $contents;
-        }
 
-        return static::$bladeViewCache[$key] = $this->createBladeViewFromString($this->factory(), $contents);
+        return static::$bladeViewCache[$key] = $this->createBladeViewFromString($contents);
     }
 
     /**
      * Create a Blade view with the raw component string content.
      *
-     * @param  \Illuminate\Contracts\View\Factory  $factory
      * @param  string  $contents
      * @return string
      */
-    protected function createBladeViewFromString($factory, $contents)
+    protected function createBladeViewFromString($contents)
     {
-        $factory->addNamespace(
-            '__components',
-            $directory = Container::getInstance()['config']->get('view.compiled')
-        );
+        $directory = \App::getPath() . "/cache/compiled/";
 
         if (!is_file($viewFile = $directory . '/' . hash('xxh128', $contents) . '.blade.php')) {
             if (!is_dir($directory)) {
@@ -199,7 +197,7 @@ abstract class Component
             file_put_contents($viewFile, $contents);
         }
 
-        return '__components::' . basename($viewFile, '.blade.php');
+        return $viewFile;
     }
 
     /**
