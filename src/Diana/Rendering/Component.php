@@ -102,7 +102,7 @@ abstract class Component
             return new static(...array_intersect_key($data, array_flip($parameters)));
         }
 
-        return Container::getInstance()->make(static::class, $data);
+        return Container::getInstance()->resolve(static::class, $data);
     }
 
     /**
@@ -411,7 +411,7 @@ abstract class Component
     protected function factory()
     {
         if (is_null(static::$factory)) {
-            static::$factory = Container::getInstance()->make('view');
+            static::$factory = Container::getInstance()->resolve('view');
         }
 
         return static::$factory;

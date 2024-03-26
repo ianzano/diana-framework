@@ -5,6 +5,7 @@ namespace Diana\Rendering;
 use Diana\Runtime\Container;
 use Diana\Runtime\Application;
 
+use Diana\Support\Debug;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -283,12 +284,13 @@ class ComponentTagCompiler
         foreach ($namespace as &$name)
             $name = $this->formatClassName($name);
 
-        $class = join("\\", $namespace);
+        $class = "\\" . join("\\", $namespace);
 
         if (class_exists($class))
             return $class;
 
-        $viewFactory = Container::getInstance()->make(Factory::class);
+        // unclean:
+        $viewFactory = Container::getInstance()->resolve(Factory::class);
 
         if (isset ($this->aliases[$component])) {
             if (class_exists($alias = $this->aliases[$component])) {
