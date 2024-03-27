@@ -93,13 +93,9 @@ class CompilerEngine extends PhpEngine
     /**
      * Handle a view exception.
      *
-     * @param  \Throwable  $e
-     * @param  int  $obLevel
-     * @return void
-     *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    protected function handleViewException(Throwable $e, $obLevel)
+    protected function handleViewException(Throwable $e, int $obLevel): void
     {
         if (
             $e instanceof HttpException ||
@@ -130,7 +126,7 @@ class CompilerEngine extends PhpEngine
      */
     public function getCompiler()
     {
-        return $this->compler;
+        return $this->compiler;
     }
 
     /**

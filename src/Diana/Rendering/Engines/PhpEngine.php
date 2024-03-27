@@ -64,14 +64,10 @@ class PhpEngine extends Engine
 
     /**
      * Handle a view exception.
-     *
-     * @param  \Throwable  $e
-     * @param  int  $obLevel
-     * @return void
-     *
+     * 
      * @throws \Throwable
      */
-    protected function handleViewException(Throwable $e, $obLevel)
+    protected function handleViewException(Throwable $e, int $obLevel): void
     {
         while (ob_get_level() > $obLevel) {
             ob_end_clean();

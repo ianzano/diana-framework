@@ -5,6 +5,7 @@ namespace Diana\Rendering;
 use Closure;
 use Diana\Runtime\Container;
 use Illuminate\View\ComponentAttributeBag;
+use Illuminate\View\InvokableComponentVariable;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;

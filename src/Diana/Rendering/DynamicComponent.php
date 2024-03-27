@@ -41,8 +41,6 @@ class DynamicComponent extends Component
 
     /**
      * Get the view / contents that represent the component.
-     *
-     * @return View|string
      */
     public function render()
     {

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 
 use Illuminate\View\Compilers\CompilerInterface;
 use InvalidArgumentException;
+use ErrorException;
 
 class Compiler implements CompilerInterface
 {
@@ -687,14 +688,8 @@ class Compiler implements CompilerInterface
 
     /**
      * Replace the first match for a statement compilation operation.
-     *
-     * @param  string  $search
-     * @param  string  $replace
-     * @param  string  $subject
-     * @param  int  $offset
-     * @return array
      */
-    protected function replaceFirstStatement($search, $replace, $subject, $offset)
+    protected function replaceFirstStatement(string $search, string $replace, string $subject, int $offset): string|array
     {
         $search = (string) $search;
 
