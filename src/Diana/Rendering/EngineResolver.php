@@ -3,34 +3,23 @@
 namespace Diana\Rendering;
 
 use Closure;
+use Diana\Rendering\Engines\Engine;
 use InvalidArgumentException;
 
 class EngineResolver
 {
-    /**
-     * The array of engine resolvers.
-     *
-     * @var array
-     */
-    protected $resolvers = [];
+    // The array of engine resolvers.
+    protected array $resolvers = [];
 
-    /**
-     * The resolved engine instances.
-     *
-     * @var array
-     */
-    protected $resolved = [];
+    // The resolved engine instances.
+    protected array $resolved = [];
 
     /**
      * Register a new engine resolver.
      *
      * The engine string typically corresponds to a file extension.
-     *
-     * @param  string  $engine
-     * @param  \Closure  $resolver
-     * @return void
      */
-    public function register($engine, Closure $resolver)
+    public function register(string $engine, Closure $resolver): void
     {
         $this->forget($engine);
 
@@ -39,32 +28,24 @@ class EngineResolver
 
     /**
      * Resolve an engine instance by name.
-     *
-     * @param  string  $engine
-     * @return \Illuminate\Contracts\View\Engine
-     *
-     * @throws \InvalidArgumentException
+     * 
+     * @throws InvalidArgumentException
      */
-    public function resolve($engine)
+    public function resolve(string $engine): Engine
     {
-        if (isset ($this->resolved[$engine])) {
+        if (isset($this->resolved[$engine])) {
             return $this->resolved[$engine];
         }
 
-        if (isset ($this->resolvers[$engine])) {
+        if (isset($this->resolvers[$engine])) {
             return $this->resolved[$engine] = call_user_func($this->resolvers[$engine]);
         }
 
         throw new InvalidArgumentException("Engine [{$engine}] not found.");
     }
 
-    /**
-     * Remove a resolved engine.
-     *
-     * @param  string  $engine
-     * @return void
-     */
-    public function forget($engine)
+    // Remove a resolved engine.
+    public function forget(string $engine): void
     {
         unset($this->resolved[$engine]);
     }

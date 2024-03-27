@@ -2,10 +2,9 @@
 
 namespace Diana\Rendering\Engines;
 
-use Illuminate\Contracts\View\Engine;
 use Illuminate\Filesystem\Filesystem;
 
-class FileEngine implements Engine
+class FileEngine
 {
     /**
      * The filesystem instance.

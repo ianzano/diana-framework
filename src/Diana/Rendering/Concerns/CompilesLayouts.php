@@ -67,7 +67,7 @@ trait CompilesLayouts
     {
         $escapedLastSection = strtr($this->lastSection, ['\\' => '\\\\', "'" => "\\'"]);
 
-        return "<?php echo \Illuminate\View\Factory::parentPlaceholder('{$escapedLastSection}'); ?>";
+        return "<?php echo \Diana\Rendering\Driver::parentPlaceholder('{$escapedLastSection}'); ?>";
     }
 
     /**

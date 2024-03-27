@@ -42,7 +42,7 @@ class DynamicComponent extends Component
     /**
      * Get the view / contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|string
+     * @return View|string
      */
     public function render()
     {
@@ -88,7 +88,7 @@ EOF;
      */
     protected function compileProps(array $bindings)
     {
-        if (empty ($bindings)) {
+        if (empty($bindings)) {
             return '';
         }
 
@@ -130,7 +130,7 @@ EOF;
      */
     protected function classForComponent()
     {
-        if (isset (static::$componentClasses[$this->component])) {
+        if (isset(static::$componentClasses[$this->component])) {
             return static::$componentClasses[$this->component];
         }
 

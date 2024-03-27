@@ -42,7 +42,7 @@ class RenderingPackage extends Package
             return $engine;
         });
 
-        $driver = new Driver($app, $resolver, $compiler);
+        $driver = new Driver($resolver, $compiler);
 
         $driver->directive("vite", function ($entry) {
             $entry = trim($entry, "\"'");

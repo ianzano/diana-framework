@@ -4,8 +4,6 @@ namespace Diana\Rendering;
 
 use Diana\Runtime\Container;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -139,8 +137,7 @@ class Compiler implements CompilerInterface
         }
     }
 
-    use Concerns\CompilesAuthorizations,
-        Concerns\CompilesClasses,
+    use Concerns\CompilesClasses,
         Concerns\CompilesComments,
         Concerns\CompilesComponents,
         Concerns\CompilesConditionals,
@@ -452,9 +449,7 @@ class Compiler implements CompilerInterface
             }
         };
 
-        $view = Container::getInstance()
-            ->resolve(ViewFactory::class)
-            ->make($component->resolveView(), $data);
+        $view = Container::getInstance()->resolve(Renderer::class)->make($component->resolveView(), $data);
 
         return tap($view->render(), function () use ($view, $deleteCachedView) {
             if ($deleteCachedView) {
@@ -942,9 +937,7 @@ class Compiler implements CompilerInterface
             'prefixHash' => $prefixHash,
         ];
 
-        Container::getInstance()
-            ->resolve(ViewFactory::class)
-            ->addNamespace($prefixHash, $path);
+        Container::getInstance()->resolve(Renderer::class)->addNamespace($prefixHash, $path);
     }
 
     /**

@@ -2,9 +2,7 @@
 
 namespace Diana\Rendering;
 
-use Diana\Runtime\Application;
-
-use Diana\Support\Debug;
+use Diana\Rendering\Engines\Engine;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
@@ -67,7 +65,7 @@ class Driver implements Renderer
      * @param  EngineResolver  $engines
      * @return void
      */
-    public function __construct(Application $app, protected EngineResolver $engines, protected Compiler $compiler)
+    public function __construct(protected EngineResolver $engines, protected Compiler $compiler)
     {
         $this->share('__env', $this);
     }
@@ -86,7 +84,7 @@ class Driver implements Renderer
      * Get the appropriate view engine for the given path.
      *
      * @param  string  $path
-     * @return \Illuminate\Contracts\View\Engine
+     * @return Engine
      *
      * @throws \InvalidArgumentException
      */

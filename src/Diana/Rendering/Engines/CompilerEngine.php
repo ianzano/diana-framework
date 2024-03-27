@@ -6,7 +6,7 @@ use Illuminate\Database\RecordsNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\View\Compilers\CompilerInterface;
-use Illuminate\View\ViewException;
+use Diana\Exceptions\ViewException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
@@ -14,8 +14,6 @@ class CompilerEngine extends PhpEngine
 {
     /**
      * The Blade compiler instance.
-     *
-     * @var \Illuminate\View\Compilers\CompilerInterface
      */
     protected $compiler;
 
@@ -61,7 +59,7 @@ class CompilerEngine extends PhpEngine
         // If this given view has expired, which means it has simply been edited since
         // it was last compiled, we will re-compile the views so we can evaluate a
         // fresh copy of the view. We'll pass the compiler the path of the view.
-        if (!isset ($this->compiledOrNotExpired[$path]) && $this->compiler->isExpired($path)) {
+        if (!isset($this->compiledOrNotExpired[$path]) && $this->compiler->isExpired($path)) {
             $this->compiler->compile($path);
         }
 
@@ -76,7 +74,7 @@ class CompilerEngine extends PhpEngine
                 throw $e;
             }
 
-            if (!isset ($this->compiledOrNotExpired[$path])) {
+            if (!isset($this->compiledOrNotExpired[$path])) {
                 throw $e;
             }
 
@@ -129,12 +127,10 @@ class CompilerEngine extends PhpEngine
 
     /**
      * Get the compiler implementation.
-     *
-     * @return \Illuminate\View\Compilers\CompilerInterface
      */
     public function getCompiler()
     {
-        return $this->compiler;
+        return $this->compler;
     }
 
     /**

@@ -14,42 +14,6 @@ trait CompilesConditionals
     protected $firstCaseInSwitch = true;
 
     /**
-     * Compile the if-auth statements into valid PHP.
-     *
-     * @param  string|null  $guard
-     * @return string
-     */
-    protected function compileAuth($guard = null)
-    {
-        $guard = is_null($guard) ? '()' : $guard;
-
-        return "<?php if(auth()->guard{$guard}->check()): ?>";
-    }
-
-    /**
-     * Compile the else-auth statements into valid PHP.
-     *
-     * @param  string|null  $guard
-     * @return string
-     */
-    protected function compileElseAuth($guard = null)
-    {
-        $guard = is_null($guard) ? '()' : $guard;
-
-        return "<?php elseif(auth()->guard{$guard}->check()): ?>";
-    }
-
-    /**
-     * Compile the end-auth statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndAuth()
-    {
-        return '<?php endif; ?>';
-    }
-
-    /**
      * Compile the env statements into valid PHP.
      *
      * @param  string  $environments
@@ -91,42 +55,6 @@ trait CompilesConditionals
     }
 
     /**
-     * Compile the if-guest statements into valid PHP.
-     *
-     * @param  string|null  $guard
-     * @return string
-     */
-    protected function compileGuest($guard = null)
-    {
-        $guard = is_null($guard) ? '()' : $guard;
-
-        return "<?php if(auth()->guard{$guard}->guest()): ?>";
-    }
-
-    /**
-     * Compile the else-guest statements into valid PHP.
-     *
-     * @param  string|null  $guard
-     * @return string
-     */
-    protected function compileElseGuest($guard = null)
-    {
-        $guard = is_null($guard) ? '()' : $guard;
-
-        return "<?php elseif(auth()->guard{$guard}->guest()): ?>";
-    }
-
-    /**
-     * Compile the end-guest statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndGuest()
-    {
-        return '<?php endif; ?>';
-    }
-
-    /**
      * Compile the has-section statements into valid PHP.
      *
      * @param  string  $expression
@@ -160,17 +88,6 @@ trait CompilesConditionals
     }
 
     /**
-     * Compile the unless statements into valid PHP.
-     *
-     * @param  string  $expression
-     * @return string
-     */
-    protected function compileUnless($expression)
-    {
-        return "<?php if (! {$expression}): ?>";
-    }
-
-    /**
      * Compile the else-if statements into valid PHP.
      *
      * @param  string  $expression
@@ -197,16 +114,6 @@ trait CompilesConditionals
      * @return string
      */
     protected function compileEndif()
-    {
-        return '<?php endif; ?>';
-    }
-
-    /**
-     * Compile the end-unless statements into valid PHP.
-     *
-     * @return string
-     */
-    protected function compileEndunless()
     {
         return '<?php endif; ?>';
     }

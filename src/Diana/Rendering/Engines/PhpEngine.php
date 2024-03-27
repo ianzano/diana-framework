@@ -2,11 +2,10 @@
 
 namespace Diana\Rendering\Engines;
 
-use Illuminate\Contracts\View\Engine;
 use Illuminate\Filesystem\Filesystem;
 use Throwable;
 
-class PhpEngine implements Engine
+class PhpEngine
 {
     /**
      * The filesystem instance.

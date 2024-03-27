@@ -2,7 +2,7 @@
 
 namespace Diana\Rendering\Concerns;
 
-use Illuminate\Contracts\View\View;
+use Diana\Rendering\View;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -73,7 +73,7 @@ trait ManagesLayouts
      */
     public function yieldSection()
     {
-        if (empty ($this->sectionStack)) {
+        if (empty($this->sectionStack)) {
             return '';
         }
 
@@ -90,7 +90,7 @@ trait ManagesLayouts
      */
     public function stopSection($overwrite = false)
     {
-        if (empty ($this->sectionStack)) {
+        if (empty($this->sectionStack)) {
             throw new InvalidArgumentException('Cannot end a section without first starting one.');
         }
 
@@ -114,13 +114,13 @@ trait ManagesLayouts
      */
     public function appendSection()
     {
-        if (empty ($this->sectionStack)) {
+        if (empty($this->sectionStack)) {
             throw new InvalidArgumentException('Cannot end a section without first starting one.');
         }
 
         $last = array_pop($this->sectionStack);
 
-        if (isset ($this->sections[$last])) {
+        if (isset($this->sections[$last])) {
             $this->sections[$last] .= ob_get_clean();
         } else {
             $this->sections[$last] = ob_get_clean();
@@ -138,7 +138,7 @@ trait ManagesLayouts
      */
     protected function extendSection($section, $content)
     {
-        if (isset ($this->sections[$section])) {
+        if (isset($this->sections[$section])) {
             $content = str_replace(static::parentPlaceholder($section), $content, $this->sections[$section]);
         }
 
@@ -156,7 +156,7 @@ trait ManagesLayouts
     {
         $sectionContent = $default instanceof View ? $default : e($default);
 
-        if (isset ($this->sections[$section])) {
+        if (isset($this->sections[$section])) {
             $sectionContent = $this->sections[$section];
         }
 
@@ -177,7 +177,7 @@ trait ManagesLayouts
      */
     public static function parentPlaceholder($section = '')
     {
-        if (!isset (static::$parentPlaceholder[$section])) {
+        if (!isset(static::$parentPlaceholder[$section])) {
             $salt = static::parentPlaceholderSalt();
 
             static::$parentPlaceholder[$section] = '##parent-placeholder-' . hash('xxh128', $salt . $section) . '##';

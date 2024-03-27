@@ -2,11 +2,6 @@
 
 namespace Diana\Rendering;
 
-use Diana\Runtime\Container;
-use Diana\Runtime\Application;
-
-use Diana\Support\Debug;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Illuminate\View\AnonymousComponent;
@@ -289,115 +284,12 @@ class ComponentTagCompiler
         if (class_exists($class))
             return $class;
 
-        // unclean:
-        $viewFactory = Container::getInstance()->resolve(Factory::class);
-
-        if (isset ($this->aliases[$component])) {
-            if (class_exists($alias = $this->aliases[$component])) {
-                return $alias;
-            }
-
-            if ($viewFactory->exists($alias)) {
-                return $alias;
-            }
-
-            throw new InvalidArgumentException(
-                "Unable to locate class or view [{$alias}] for component [{$component}]."
-            );
-        }
-
-        if ($class = $this->findClassByComponent($component)) {
-            return $class;
-        }
-
-        if (class_exists($class = $this->guessClassName($component))) {
-            return $class;
-        }
-
-        if (
-            !is_null($guess = $this->guessAnonymousComponentUsingNamespaces($viewFactory, $component)) ||
-            !is_null($guess = $this->guessAnonymousComponentUsingPaths($viewFactory, $component))
-        ) {
-            return $guess;
-        }
-
-        if (Str::startsWith($component, 'mail::')) {
+        if (Str::startsWith($component, 'mail::'))
             return $component;
-        }
 
         throw new InvalidArgumentException(
             "Unable to locate a class or view for component [{$component}]."
         );
-    }
-
-    /**
-     * Attempt to find an anonymous component using the registered anonymous component paths.
-     *
-     * @param  \Illuminate\Contracts\View\Factory  $viewFactory
-     * @param  string  $component
-     * @return string|null
-     */
-    protected function guessAnonymousComponentUsingPaths(Factory $viewFactory, string $component)
-    {
-        $delimiter = self::HINT_PATH_DELIMITER;
-
-        foreach ($this->blade->getAnonymousComponentPaths() as $path) {
-            try {
-                if (
-                    str_contains($component, $delimiter) &&
-                    !str_starts_with($component, $path['prefix'] . $delimiter)
-                ) {
-                    continue;
-                }
-
-                $formattedComponent = str_starts_with($component, $path['prefix'] . $delimiter)
-                    ? Str::after($component, $delimiter)
-                    : $component;
-
-                if (
-                    !is_null($guess = match (true) {
-                        $viewFactory->exists($guess = $path['prefixHash'] . $delimiter . $formattedComponent) => $guess,
-                        $viewFactory->exists($guess = $path['prefixHash'] . $delimiter . $formattedComponent . '.index') => $guess,
-                        default => null,
-                    })
-                ) {
-                    return $guess;
-                }
-            } catch (InvalidArgumentException) {
-                //
-            }
-        }
-    }
-
-    /**
-     * Attempt to find an anonymous component using the registered anonymous component namespaces.
-     *
-     * @param  \Illuminate\Contracts\View\Factory  $viewFactory
-     * @param  string  $component
-     * @return string|null
-     */
-    protected function guessAnonymousComponentUsingNamespaces(Factory $viewFactory, string $component)
-    {
-        return collect($this->blade->getAnonymousComponentNamespaces())
-            ->filter(function ($directory, $prefix) use ($component) {
-                return Str::startsWith($component, $prefix . '::');
-            })
-            ->prepend('components', $component)
-            ->reduce(function ($carry, $directory, $prefix) use ($component, $viewFactory) {
-                if (!is_null($carry)) {
-                    return $carry;
-                }
-
-                $componentName = Str::after($component, $prefix . '::');
-
-                if ($viewFactory->exists($view = $this->guessViewName($componentName, $directory))) {
-                    return $view;
-                }
-
-                if ($viewFactory->exists($view = $this->guessViewName($componentName, $directory) . '.index')) {
-                    return $view;
-                }
-            });
     }
 
     /**
@@ -412,30 +304,13 @@ class ComponentTagCompiler
 
         $prefix = $segments[0];
 
-        if (!isset ($this->namespaces[$prefix], $segments[1])) {
+        if (!isset($this->namespaces[$prefix], $segments[1])) {
             return;
         }
 
         if (class_exists($class = $this->namespaces[$prefix] . '\\' . $this->formatClassName($segments[1]))) {
             return $class;
         }
-    }
-
-    /**
-     * Guess the class name for the given component.
-     *
-     * @param  string  $component
-     * @return string
-     */
-    public function guessClassName(string $component)
-    {
-        $namespace = Container::getInstance()
-            ->make(Application::class)
-            ->getNamespace();
-
-        $class = $this->formatClassName($component);
-
-        return $namespace . 'View\\Components\\' . $class;
     }
 
     /**
@@ -451,28 +326,6 @@ class ComponentTagCompiler
         }, explode('.', $component));
 
         return implode('\\', $componentPieces);
-    }
-
-    /**
-     * Guess the view name for the given component.
-     *
-     * @param  string  $name
-     * @param  string  $prefix
-     * @return string
-     */
-    public function guessViewName($name, $prefix = 'components.')
-    {
-        if (!Str::endsWith($prefix, '.')) {
-            $prefix .= '.';
-        }
-
-        $delimiter = self::HINT_PATH_DELIMITER;
-
-        if (str_contains($name, $delimiter)) {
-            return Str::replaceFirst($delimiter, $delimiter . $prefix, $name);
-        }
-
-        return $prefix . $name;
     }
 
     /**
