@@ -12,7 +12,7 @@ class Driver implements Renderer
 {
     use
         Concerns\ManagesComponents,
-        // Concerns\ManagesFragments,
+        Concerns\ManagesFragments,
         Concerns\ManagesLayouts,
         Concerns\ManagesLoops,
         Concerns\ManagesStacks,
@@ -20,38 +20,12 @@ class Driver implements Renderer
 
     public function render(string $path, array $data = []): string
     {
-        try {
-            // We will keep track of the number of views being rendered so we can flush
-            // the section after the complete rendering operation is done. This will
-            // clear out the sections for any separate views that may be rendered.
-            $this->renderCount++;
+        return $this->make($path, $data)->render();
+    }
 
-            try {
-                $engine = $this->getEngineFromPath($path);
-            } catch (\Exception $e) {
-                Debug::dump($path);
-                die;
-            }
-
-            $contents = $engine->get($path, array_merge($this->shared, $data));
-
-            // Once we've finished rendering the view, we'll decrement the render count
-            // so that each section gets flushed out next time a view is created and
-            // no old sections are staying around in the memory of an environment.
-            $this->renderCount--;
-
-            // Once we have the contents of the view, we will flush the sections if we are
-            // done rendering all views so that there is nothing left hanging over when
-            // another view gets rendered in the future by the application developer.
-            if ($this->doneRendering())
-                $this->flushState();
-
-            return $contents;
-        } catch (\Exception $e) {
-            $this->flushState();
-
-            throw $e;
-        }
+    public function make(string $path, array $data = []): View
+    {
+        return new View($this, $path, $data);
     }
 
     /**
@@ -171,6 +145,16 @@ class Driver implements Renderer
         return $this->renderCount == 0;
     }
 
+    public function incrementRenderCount()
+    {
+        $this->renderCount++;
+    }
+
+    public function decrementRenderCount()
+    {
+        $this->renderCount--;
+    }
+
     /**
      * Determine if the given once token has been rendered.
      *
@@ -179,7 +163,7 @@ class Driver implements Renderer
      */
     public function hasRenderedOnce(string $id)
     {
-        return isset ($this->renderedOnce[$id]);
+        return isset($this->renderedOnce[$id]);
     }
 
     /**
@@ -206,7 +190,7 @@ class Driver implements Renderer
         $this->flushSections();
         $this->flushStacks();
         $this->flushComponents();
-        // $this->flushFragments();
+        $this->flushFragments();
     }
 
     /**
@@ -217,5 +201,10 @@ class Driver implements Renderer
     public function getExtensions()
     {
         return $this->extensions;
+    }
+
+    public function getShared()
+    {
+        return $this->shared;
     }
 }

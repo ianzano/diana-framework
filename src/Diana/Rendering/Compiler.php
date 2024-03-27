@@ -4,17 +4,13 @@ namespace Diana\Rendering;
 
 use Diana\Runtime\Container;
 
-use Diana\Support\Debug;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 use Illuminate\View\Compilers\CompilerInterface;
-use Illuminate\View\Component;
 use InvalidArgumentException;
 
 class Compiler implements CompilerInterface
@@ -311,7 +307,7 @@ class Compiler implements CompilerInterface
         if (!is_null($this->cachePath)) {
             $contents = $this->compileString($this->files->get($this->getPath()));
 
-            if (!empty ($this->getPath())) {
+            if (!empty($this->getPath())) {
                 $contents = $this->appendFilePath($contents);
             }
 
@@ -410,7 +406,7 @@ class Compiler implements CompilerInterface
             $result .= is_array($token) ? $this->parseToken($token) : $token;
         }
 
-        if (!empty ($this->rawBlocks)) {
+        if (!empty($this->rawBlocks)) {
             $result = $this->restoreRawContent($result);
         }
 
@@ -421,7 +417,7 @@ class Compiler implements CompilerInterface
             $result = $this->addFooters($result);
         }
 
-        if (!empty ($this->echoHandlers)) {
+        if (!empty($this->echoHandlers)) {
             $result = $this->addBladeCompilerVariable($result);
         }
 
@@ -470,7 +466,7 @@ class Compiler implements CompilerInterface
     /**
      * Render a component instance to HTML.
      *
-     * @param  \Illuminate\View\Component  $component
+     * @param  Component  $component
      * @return string
      */
     public static function renderComponent(Component $component)
@@ -479,16 +475,10 @@ class Compiler implements CompilerInterface
 
         $view = value($component->resolveView(), $data);
 
-        if ($view instanceof View) {
-            return $view->with($data)->render();
-        } elseif ($view instanceof Htmlable) {
-            return $view->toHtml();
-        } else {
-            return Container::getInstance()
-                ->resolve(ViewFactory::class)
-                ->make($view, $data)
-                ->render();
-        }
+        if (!$view instanceof View)
+            $view = Container::getInstance()->resolve(Renderer::class)->make($view);
+
+        return $view->with($data)->render();
     }
 
     /**
@@ -656,7 +646,7 @@ class Compiler implements CompilerInterface
 
         $offset = 0;
 
-        for ($i = 0; isset ($matches[0][$i]); $i++) {
+        for ($i = 0; isset($matches[0][$i]); $i++) {
             $match = [
                 $matches[0][$i],
                 $matches[1][$i],
@@ -669,7 +659,7 @@ class Compiler implements CompilerInterface
             // regex pattern or not, and will recursively continue on to the next ")"
             // then check again until the tokenizer confirms we find the right one.
             while (
-                isset ($match[4]) &&
+                isset($match[4]) &&
                 Str::endsWith($match[0], ')') &&
                 !$this->hasEvenNumberOfParentheses($match[0])
             ) {
@@ -679,7 +669,7 @@ class Compiler implements CompilerInterface
 
                 $rest = Str::before($after, ')');
 
-                if (isset ($matches[0][$i + 1]) && Str::contains($rest . ')', $matches[0][$i + 1])) {
+                if (isset($matches[0][$i + 1]) && Str::contains($rest . ')', $matches[0][$i + 1])) {
                     unset($matches[0][$i + 1]);
                     $i++;
                 }
@@ -766,8 +756,8 @@ class Compiler implements CompilerInterface
     protected function compileStatement($match)
     {
         if (str_contains($match[1], '@')) {
-            $match[0] = isset ($match[3]) ? $match[1] . $match[3] : $match[1];
-        } elseif (isset ($this->customDirectives[$match[1]])) {
+            $match[0] = isset($match[3]) ? $match[1] . $match[3] : $match[1];
+        } elseif (isset($this->customDirectives[$match[1]])) {
             $match[0] = $this->callCustomDirective($match[1], Arr::get($match, 3));
         } elseif (method_exists($this, $method = 'compile' . ucfirst($match[1]))) {
             $match[0] = $this->$method(Arr::get($match, 3));
@@ -775,7 +765,7 @@ class Compiler implements CompilerInterface
             return $match[0];
         }
 
-        return isset ($match[3]) ? $match[0] : $match[0] . $match[2];
+        return isset($match[3]) ? $match[0] : $match[0] . $match[2];
     }
 
     /**
@@ -900,7 +890,7 @@ class Compiler implements CompilerInterface
                 : Str::kebab(class_basename($class));
         }
 
-        if (!empty ($prefix)) {
+        if (!empty($prefix)) {
             $alias = $prefix . '-' . $alias;
         }
 

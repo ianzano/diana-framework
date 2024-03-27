@@ -80,7 +80,7 @@ abstract class Component
     /**
      * Get the view / view contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\Support\Htmlable|\Closure|string
+     * @return View|\Illuminate\Contracts\Support\Htmlable|\Closure|string
      */
     abstract public function render();
 
@@ -100,7 +100,7 @@ abstract class Component
 
         $dataKeys = array_keys($data);
 
-        if (empty (array_diff($parameters, $dataKeys))) {
+        if (empty(array_diff($parameters, $dataKeys))) {
             return new static(...array_intersect_key($data, array_flip($parameters)));
         }
 
@@ -114,7 +114,7 @@ abstract class Component
      */
     protected static function extractConstructorParameters()
     {
-        if (!isset (static::$constructorParametersCache[static::class])) {
+        if (!isset(static::$constructorParametersCache[static::class])) {
             $class = new ReflectionClass(static::class);
 
             $constructor = $class->getConstructor();
@@ -130,24 +130,18 @@ abstract class Component
     /**
      * Resolve the Blade view or view file that should be used when rendering the component.
      *
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\Support\Htmlable|\Closure|string
+     * @return View|\Closure|string
      */
     public function resolveView()
     {
         $view = $this->render();
 
-        if ($view instanceof ViewContract) {
+        if ($view instanceof View)
             return $view;
-        }
-
-        if ($view instanceof Htmlable) {
-            return $view;
-        }
 
         $resolver = function ($view) {
-            if ($view instanceof ViewContract) {
+            if ($view instanceof View)
                 return $view;
-            }
 
             return $this->extractBladeViewFromString($view);
         };
@@ -168,7 +162,7 @@ abstract class Component
     {
         $key = sprintf('%s::%s', static::class, $contents);
 
-        if (isset (static::$bladeViewCache[$key])) {
+        if (isset(static::$bladeViewCache[$key])) {
             return static::$bladeViewCache[$key];
         }
 
@@ -224,7 +218,7 @@ abstract class Component
     {
         $class = get_class($this);
 
-        if (!isset (static::$propertyCache[$class])) {
+        if (!isset(static::$propertyCache[$class])) {
             $reflection = new ReflectionClass($this);
 
             static::$propertyCache[$class] = collect($reflection->getProperties(ReflectionProperty::IS_PUBLIC))
@@ -257,7 +251,7 @@ abstract class Component
     {
         $class = get_class($this);
 
-        if (!isset (static::$methodCache[$class])) {
+        if (!isset(static::$methodCache[$class])) {
             $reflection = new ReflectionClass($this);
 
             static::$methodCache[$class] = collect($reflection->getMethods(ReflectionMethod::IS_PUBLIC))

@@ -2,8 +2,9 @@
 
 namespace Diana\Rendering\Concerns;
 
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Contracts\View\View;
+use Diana\Rendering\View;
+
+use Diana\Support\Debug;
 use Illuminate\Support\Arr;
 use Illuminate\View\ComponentSlot;
 
@@ -97,10 +98,8 @@ trait ManagesComponents
 
             if ($view instanceof View) {
                 return $view->with($data)->render();
-            } elseif ($view instanceof Htmlable) {
-                return $view->toHtml();
             } else {
-                return $this->render($view, $data);
+                return $this->make($view, $data)->render();
             }
         } finally {
             $this->currentComponentData = $previousComponentData;
@@ -120,12 +119,14 @@ trait ManagesComponents
             '__default' => $defaultSlot,
         ], $this->slots[count($this->componentStack)]);
 
-        return array_merge(
+        $ret = array_merge(
             $this->componentData[count($this->componentStack)],
             ['slot' => $defaultSlot],
             $this->slots[count($this->componentStack)],
             ['__laravel_slots' => $slots]
         );
+
+        return $ret;
     }
 
     /**
