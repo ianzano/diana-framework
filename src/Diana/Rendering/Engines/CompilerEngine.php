@@ -2,12 +2,9 @@
 
 namespace Diana\Rendering\Engines;
 
-use Illuminate\Database\RecordsNotFoundException;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\View\Compilers\CompilerInterface;
 use Diana\Exceptions\ViewException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class CompilerEngine extends PhpEngine
@@ -97,17 +94,7 @@ class CompilerEngine extends PhpEngine
      */
     protected function handleViewException(Throwable $e, int $obLevel): void
     {
-        if (
-            $e instanceof HttpException ||
-            $e instanceof HttpResponseException ||
-            $e instanceof RecordsNotFoundException
-        ) {
-            parent::handleViewException($e, $obLevel);
-        }
-
-        $e = new ViewException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e);
-
-        parent::handleViewException($e, $obLevel);
+        parent::handleViewException(new ViewException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e), $obLevel);
     }
 
     /**

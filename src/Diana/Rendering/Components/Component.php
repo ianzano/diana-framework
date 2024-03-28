@@ -1,10 +1,11 @@
 <?php
 
-namespace Diana\Rendering;
+namespace Diana\Rendering\Components;
 
 use Closure;
+use Diana\Rendering\View;
 use Diana\Runtime\Container;
-use Illuminate\View\ComponentAttributeBag;
+use Diana\Rendering\ComponentAttributeBag;
 use Illuminate\View\InvokableComponentVariable;
 use ReflectionClass;
 use ReflectionMethod;
@@ -12,75 +13,44 @@ use ReflectionProperty;
 
 abstract class Component
 {
-    /**
-     * The properties / methods that should not be exposed to the component.
-     *
-     * @var array
-     */
-    protected $except = [];
+    // The properties / methods that should not be exposed to the component.
+    protected array $except = [];
 
-    /**
-     * The component alias name.
-     *
-     * @var string
-     */
-    public $componentName;
+    // The component alias name.
+    public string $componentName;
 
-    /**
-     * The component attributes.
-     *
-     * @var \Illuminate\View\ComponentAttributeBag
-     */
-    public $attributes;
-
-    /**
-     * The view factory instance, if any.
-     *
-     * @var \Illuminate\Contracts\View\Factory|null
-     */
-    protected static $factory;
+    // The component attributes.
+    public ?ComponentAttributeBag $attributes = null;
 
     /**
      * The component resolver callback.
      *
      * @var (\Closure(string, array): Component)|null
      */
-    protected static $componentsResolver;
+    protected static ?Closure $componentsResolver = null;
 
     /**
      * The cache of blade view names, keyed by contents.
      *
      * @var array<string, string>
      */
-    protected static $bladeViewCache = [];
+    protected static array $bladeViewCache = [];
 
-    /**
-     * The cache of public property names, keyed by class.
-     *
-     * @var array
-     */
-    protected static $propertyCache = [];
+    // The cache of public property names, keyed by class.
+    protected static array $propertyCache = [];
 
-    /**
-     * The cache of public method names, keyed by class.
-     *
-     * @var array
-     */
-    protected static $methodCache = [];
+    // The cache of public method names, keyed by class.
+    protected static array $methodCache = [];
 
     /**
      * The cache of constructor parameters, keyed by class.
      *
      * @var array<class-string, array<int, string>>
      */
-    protected static $constructorParametersCache = [];
+    protected static array $constructorParametersCache = [];
 
-    /**
-     * Get the view / view contents that represent the component.
-     *
-     * @return View|\Illuminate\Contracts\Support\Htmlable|\Closure|string
-     */
-    abstract public function render();
+    // Get the view / view contents that represent the component.
+    abstract public function render(): View|Closure|string;
 
     /**
      * Resolve the component instance with the given data.
@@ -325,7 +295,6 @@ abstract class Component
             'withName',
             'withAttributes',
             'flushCache',
-            'forgetFactory',
             'forgetComponentsResolver',
             'resolveComponentsUsing',
         ], $this->except);
@@ -359,13 +328,8 @@ abstract class Component
         return $this;
     }
 
-    /**
-     * Get a new attribute bag instance.
-     *
-     * @param  array  $attributes
-     * @return \Illuminate\View\ComponentAttributeBag
-     */
-    protected function newAttributeBag(array $attributes = [])
+    // Get a new attribute bag instance.
+    protected function newAttributeBag(array $attributes = []): ComponentAttributeBag
     {
         return new ComponentAttributeBag($attributes);
     }
@@ -381,33 +345,6 @@ abstract class Component
     }
 
     /**
-     * Get the evaluated view contents for the given view.
-     *
-     * @param  string|null  $view
-     * @param  \Illuminate\Contracts\Support\Arrayable|array  $data
-     * @param  array  $mergeData
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function view($view, $data = [], $mergeData = [])
-    {
-        return $this->factory()->make($view, $data, $mergeData);
-    }
-
-    /**
-     * Get the view factory instance.
-     *
-     * @return \Illuminate\Contracts\View\Factory
-     */
-    protected function factory()
-    {
-        if (is_null(static::$factory)) {
-            static::$factory = Container::getInstance()->resolve('view');
-        }
-
-        return static::$factory;
-    }
-
-    /**
      * Flush the component's cached state.
      *
      * @return void
@@ -418,16 +355,6 @@ abstract class Component
         static::$constructorParametersCache = [];
         static::$methodCache = [];
         static::$propertyCache = [];
-    }
-
-    /**
-     * Forget the component's factory instance.
-     *
-     * @return void
-     */
-    public static function forgetFactory()
-    {
-        static::$factory = null;
     }
 
     /**

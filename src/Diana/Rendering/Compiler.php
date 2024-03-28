@@ -6,7 +6,7 @@ use Diana\Runtime\Container;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use Diana\Support\Helpers\Str;
 
 use Illuminate\View\Compilers\CompilerInterface;
 use InvalidArgumentException;
@@ -825,20 +825,14 @@ class Compiler implements CompilerInterface
 
         $this->directive($name, function ($expression) use ($name) {
             return $expression !== ''
-                ? "<?php if (\Illuminate\Support\Facades\Blade::check('{$name}', {$expression})): ?>"
-                : "<?php if (\Illuminate\Support\Facades\Blade::check('{$name}')): ?>";
-        });
-
-        $this->directive('unless' . $name, function ($expression) use ($name) {
-            return $expression !== ''
-                ? "<?php if (! \Illuminate\Support\Facades\Blade::check('{$name}', {$expression})): ?>"
-                : "<?php if (! \Illuminate\Support\Facades\Blade::check('{$name}')): ?>";
+                ? "<?php if (\Diana\Support\Facades\Compiler::check('{$name}', {$expression})): ?>"
+                : "<?php if (\Diana\Support\Facades\Compiler::check('{$name}')): ?>";
         });
 
         $this->directive('else' . $name, function ($expression) use ($name) {
             return $expression !== ''
-                ? "<?php elseif (\Illuminate\Support\Facades\Blade::check('{$name}', {$expression})): ?>"
-                : "<?php elseif (\Illuminate\Support\Facades\Blade::check('{$name}')): ?>";
+                ? "<?php elseif (\Diana\Support\Facades\Compiler::check('{$name}', {$expression})): ?>"
+                : "<?php elseif (\Diana\Support\Facades\Compiler::check('{$name}')): ?>";
         });
 
         $this->directive('end' . $name, function () {
@@ -946,10 +940,7 @@ class Compiler implements CompilerInterface
     {
         $prefix ??= $directory;
 
-        $this->anonymousComponentNamespaces[$prefix] = Str::of($directory)
-            ->replace('/', '.')
-            ->trim('. ')
-            ->toString();
+        $this->anonymousComponentNamespaces[$prefix] = trim(Str::replace('/', '.', $directory), '. ');
     }
 
     /**

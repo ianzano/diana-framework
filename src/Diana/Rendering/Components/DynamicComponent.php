@@ -1,9 +1,12 @@
 <?php
 
-namespace Diana\Rendering;
+namespace Diana\Rendering\Components;
 
+use Closure;
+use Diana\Rendering\Compiler;
 use Diana\Runtime\Container;
-use Illuminate\Support\Str;
+use Diana\Rendering\ComponentTagCompiler;
+use Diana\Support\Helpers\Str;
 
 class DynamicComponent extends Component
 {
@@ -42,16 +45,17 @@ class DynamicComponent extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
+    public function render(): Closure
     {
         $template = <<<'EOF'
-<?php extract(collect($attributes->getAttributes())->mapWithKeys(function ($value, $key) { return [Illuminate\Support\Str::camel(str_replace([':', '.'], ' ', $key)) => $value]; })->all(), EXTR_SKIP); ?>
+<?php extract(collect($attributes->getAttributes())->mapWithKeys(function ($value, $key) { return [Diana\Support\Helpers\Str::camel(str_replace([':', '.'], ' ', $key)) => $value]; })->all(), EXTR_SKIP); ?>
 {{ props }}
 <x-{{ component }} {{ bindings }} {{ attributes }}>
 {{ slots }}
 {{ defaultSlot }}
 </x-{{ component }}>
 EOF;
+
 
         return function ($data) use ($template) {
             $bindings = $this->bindings($class = $this->classForComponent());
@@ -132,8 +136,7 @@ EOF;
             return static::$componentClasses[$this->component];
         }
 
-        return static::$componentClasses[$this->component] =
-            $this->compiler()->componentClass($this->component);
+        return static::$componentClasses[$this->component] = Str::formatClass($this->component);
     }
 
     /**
@@ -158,9 +161,9 @@ EOF;
     {
         if (!static::$compiler) {
             static::$compiler = new ComponentTagCompiler(
-                Container::getInstance()->resolve('blade.compiler')->getClassComponentAliases(),
-                Container::getInstance()->resolve('blade.compiler')->getClassComponentNamespaces(),
-                Container::getInstance()->resolve('blade.compiler')
+                Container::getInstance()->resolve(Compiler::class)->getClassComponentAliases(),
+                Container::getInstance()->resolve(Compiler::class)->getClassComponentNamespaces(),
+                Container::getInstance()->resolve(Compiler::class)
             );
         }
 

@@ -2,10 +2,11 @@
 
 namespace Diana\Rendering;
 
+use Diana\Support\Debug;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
-use Illuminate\View\AnonymousComponent;
-use Illuminate\View\DynamicComponent;
+use Diana\Support\Helpers\Str;
+use Diana\Rendering\Components\AnonymousComponent;
+use Diana\Rendering\Components\DynamicComponent;
 
 use InvalidArgumentException;
 use ReflectionClass;
@@ -231,7 +232,7 @@ class ComponentTagCompiler
      */
     protected function componentString(string $component, array $attributes)
     {
-        $class = $this->componentClass($component);
+        $class = '\\' . Str::formatClass($component);
 
         [$data, $attributes] = $this->partitionDataAndAttributes($class, $attributes);
 
@@ -245,7 +246,7 @@ class ComponentTagCompiler
         if (!class_exists($class)) {
             $view = Str::startsWith($component, 'mail::')
                 ? "\$__env->getContainer()->make(Illuminate\\View\\Factory::class)->make('{$component}')"
-                : "'$class'";
+                : "'$component'";
 
             $parameters = [
                 'view' => $view,
@@ -253,79 +254,21 @@ class ComponentTagCompiler
             ];
 
             $class = AnonymousComponent::class;
+
+            /*
+             throw new InvalidArgumentException(
+                "Unable to locate a class or view for component [{$component}]."
+                );
+             */
         } else {
             $parameters = $data->all();
         }
 
         return "##BEGIN-COMPONENT-CLASS##@component('{$class}', '{$component}', [" . $this->attributesToString($parameters, $escapeBound = false) . '])
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(' . $class . '::class))->getConstructor()): ?>
+<?php if (isset($attributes) && $attributes instanceof \Diana\Rendering\ComponentAttributeBag && $constructor = (new ReflectionClass(' . $class . '::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([' . $this->attributesToString($attributes->all(), $escapeAttributes = $class !== DynamicComponent::class) . ']); ?>';
-    }
-
-    /**
-     * Get the component class for a given component alias.
-     *
-     * @param  string  $component
-     * @return string
-     *
-     * @throws \InvalidArgumentException
-     */
-    public function componentClass(string $component)
-    {
-        $namespace = explode(":", $component);
-
-        foreach ($namespace as &$name)
-            $name = $this->formatClassName($name);
-
-        $class = "\\" . join("\\", $namespace);
-
-        if (class_exists($class))
-            return $class;
-
-        if (Str::startsWith($component, 'mail::'))
-            return $component;
-
-        throw new InvalidArgumentException(
-            "Unable to locate a class or view for component [{$component}]."
-        );
-    }
-
-    /**
-     * Find the class for the given component using the registered namespaces.
-     *
-     * @param  string  $component
-     * @return string|null
-     */
-    public function findClassByComponent(string $component)
-    {
-        $segments = explode('::', $component);
-
-        $prefix = $segments[0];
-
-        if (!isset($this->namespaces[$prefix], $segments[1])) {
-            return;
-        }
-
-        if (class_exists($class = $this->namespaces[$prefix] . '\\' . $this->formatClassName($segments[1]))) {
-            return $class;
-        }
-    }
-
-    /**
-     * Format the class name for the given component.
-     *
-     * @param  string  $component
-     * @return string
-     */
-    public function formatClassName(string $component)
-    {
-        $componentPieces = array_map(function ($componentPiece) {
-            return ucfirst(Str::camel($componentPiece));
-        }, explode('.', $component));
-
-        return implode('\\', $componentPieces);
     }
 
     /**

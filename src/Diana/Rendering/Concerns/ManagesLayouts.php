@@ -3,7 +3,7 @@
 namespace Diana\Rendering\Concerns;
 
 use Diana\Rendering\View;
-use Illuminate\Support\Str;
+use Diana\Support\Helpers\Str;
 use InvalidArgumentException;
 
 trait ManagesLayouts

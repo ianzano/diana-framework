@@ -3,7 +3,7 @@
 namespace Diana\Rendering\Concerns;
 
 use Closure;
-use Illuminate\Support\Str;
+use Diana\Support\Helpers\Str;
 
 trait CompilesEchos
 {
@@ -141,13 +141,11 @@ trait CompilesEchos
      */
     protected function wrapInEchoHandler($value)
     {
-        $value = Str::of($value)
-            ->trim()
-            ->when(str_ends_with($value, ';'), function ($str) {
-                return $str->beforeLast(';');
-            });
+        $value = trim($value);
+        if (Str::endsWith($value, ';'))
+            $value = Str::beforeLast($value, ';');
 
-        return empty ($this->echoHandlers) ? $value : '$__bladeCompiler->applyEchoHandler(' . $value . ')';
+        return empty($this->echoHandlers) ? $value : '$__bladeCompiler->applyEchoHandler(' . $value . ')';
     }
 
     /**
@@ -158,11 +156,11 @@ trait CompilesEchos
      */
     public function applyEchoHandler($value)
     {
-        if (is_object($value) && isset ($this->echoHandlers[get_class($value)])) {
+        if (is_object($value) && isset($this->echoHandlers[get_class($value)])) {
             return call_user_func($this->echoHandlers[get_class($value)], $value);
         }
 
-        if (is_iterable($value) && isset ($this->echoHandlers['iterable'])) {
+        if (is_iterable($value) && isset($this->echoHandlers['iterable'])) {
             return call_user_func($this->echoHandlers['iterable'], $value);
         }
 

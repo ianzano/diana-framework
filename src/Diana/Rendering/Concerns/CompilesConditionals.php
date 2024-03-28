@@ -2,7 +2,7 @@
 
 namespace Diana\Rendering\Concerns;
 
-use Illuminate\Support\Str;
+use Diana\Support\Helpers\Str;
 
 trait CompilesConditionals
 {

@@ -8,8 +8,6 @@ use Diana\Exceptions\BindingResolutionException;
 use Diana\Exceptions\CircularDependencyException;
 use Diana\Exceptions\EntryNotFoundException;
 use Exception;
-use Illuminate\Container\ContextualBindingBuilder;
-use Illuminate\Container\RewindableGenerator;
 use LogicException;
 use ReflectionClass;
 use ReflectionException;
@@ -160,23 +158,6 @@ class Container implements ArrayAccess
     protected $afterResolvingCallbacks = [];
 
     /**
-     * Define a contextual binding.
-     *
-     * @param  array|string  $concrete
-     * @return \Illuminate\Contracts\Container\ContextualBindingBuilder
-     */
-    public function when($concrete)
-    {
-        $aliases = [];
-
-        foreach (Util::arrayWrap($concrete) as $c) {
-            $aliases[] = $this->getAlias($c);
-        }
-
-        return new ContextualBindingBuilder($this, $aliases);
-    }
-
-    /**
      * Determine if the given abstract type has been bound.
      *
      * @param  string  $abstract
@@ -184,8 +165,8 @@ class Container implements ArrayAccess
      */
     public function bound($abstract)
     {
-        return isset ($this->bindings[$abstract]) ||
-            isset ($this->instances[$abstract]) ||
+        return isset($this->bindings[$abstract]) ||
+            isset($this->instances[$abstract]) ||
             $this->isAlias($abstract);
     }
 
@@ -211,8 +192,8 @@ class Container implements ArrayAccess
             $abstract = $this->getAlias($abstract);
         }
 
-        return isset ($this->resolved[$abstract]) ||
-            isset ($this->instances[$abstract]);
+        return isset($this->resolved[$abstract]) ||
+            isset($this->instances[$abstract]);
     }
 
     /**
@@ -223,8 +204,8 @@ class Container implements ArrayAccess
      */
     public function isShared($abstract)
     {
-        return isset ($this->instances[$abstract]) ||
-            (isset ($this->bindings[$abstract]['shared']) &&
+        return isset($this->instances[$abstract]) ||
+            (isset($this->bindings[$abstract]['shared']) &&
                 $this->bindings[$abstract]['shared'] === true);
     }
 
@@ -236,7 +217,7 @@ class Container implements ArrayAccess
      */
     public function isAlias($name)
     {
-        return isset ($this->aliases[$name]);
+        return isset($this->aliases[$name]);
     }
 
     /**
@@ -311,7 +292,7 @@ class Container implements ArrayAccess
      */
     public function hasMethodBinding($method)
     {
-        return isset ($this->methodBindings[$method]);
+        return isset($this->methodBindings[$method]);
     }
 
     /**
@@ -448,7 +429,7 @@ class Container implements ArrayAccess
     {
         $abstract = $this->getAlias($abstract);
 
-        if (isset ($this->instances[$abstract])) {
+        if (isset($this->instances[$abstract])) {
             $this->instances[$abstract] = $closure($this->instances[$abstract], $this);
 
             $this->rebound($abstract);
@@ -496,7 +477,7 @@ class Container implements ArrayAccess
      */
     protected function removeAbstractAlias($searched)
     {
-        if (!isset ($this->aliases[$searched])) {
+        if (!isset($this->aliases[$searched])) {
             return;
         }
 
@@ -521,7 +502,7 @@ class Container implements ArrayAccess
         $tags = is_array($tags) ? $tags : array_slice(func_get_args(), 1);
 
         foreach ($tags as $tag) {
-            if (!isset ($this->tags[$tag])) {
+            if (!isset($this->tags[$tag])) {
                 $this->tags[$tag] = [];
             }
 
@@ -529,25 +510,6 @@ class Container implements ArrayAccess
                 $this->tags[$tag][] = $abstract;
             }
         }
-    }
-
-    /**
-     * Resolve all of the bindings for a given tag.
-     *
-     * @param  string  $tag
-     * @return iterable
-     */
-    public function tagged($tag)
-    {
-        if (!isset ($this->tags[$tag])) {
-            return [];
-        }
-
-        return new RewindableGenerator(function () use ($tag) {
-            foreach ($this->tags[$tag] as $abstract) {
-                yield $this->resolve($abstract);
-            }
-        }, count($this->tags[$tag]));
     }
 
     /**
@@ -745,12 +707,12 @@ class Container implements ArrayAccess
 
         $concrete = $this->getContextualConcrete($abstract);
 
-        $needsContextualBuild = !empty ($parameters) || !is_null($concrete);
+        $needsContextualBuild = !empty($parameters) || !is_null($concrete);
 
         // If an instance of the type is currently being managed as a singleton we'll
         // just return an existing instance instead of instantiating new instances
         // so the developer can keep using the same objects instance every time.
-        if (isset ($this->instances[$abstract]) && !$needsContextualBuild) {
+        if (isset($this->instances[$abstract]) && !$needsContextualBuild) {
             return $this->instances[$abstract];
         }
 
@@ -806,7 +768,7 @@ class Container implements ArrayAccess
         // If we don't have a registered resolver or concrete for the type, we'll just
         // assume each type is a concrete name and will attempt to resolve it as is
         // since the container should be able to resolve concretes automatically.
-        if (isset ($this->bindings[$abstract])) {
+        if (isset($this->bindings[$abstract])) {
             return $this->bindings[$abstract]['concrete'];
         }
 
@@ -828,7 +790,7 @@ class Container implements ArrayAccess
         // Next we need to see if a contextual binding might be bound under an alias of the
         // given abstract type. So, we will need to check if any aliases exist with this
         // type and then spin through them and check for contextual bindings on these.
-        if (empty ($this->abstractAliases[$abstract])) {
+        if (empty($this->abstractAliases[$abstract])) {
             return;
         }
 
@@ -1088,7 +1050,7 @@ class Container implements ArrayAccess
      */
     protected function notInstantiable($concrete)
     {
-        if (!empty ($this->buildStack)) {
+        if (!empty($this->buildStack)) {
             $previous = implode(', ', $this->buildStack);
 
             $message = "Target [$concrete] is not instantiable while building [$previous].";
@@ -1296,7 +1258,7 @@ class Container implements ArrayAccess
      */
     public function getAlias($abstract)
     {
-        return isset ($this->aliases[$abstract])
+        return isset($this->aliases[$abstract])
             ? $this->getAlias($this->aliases[$abstract])
             : $abstract;
     }

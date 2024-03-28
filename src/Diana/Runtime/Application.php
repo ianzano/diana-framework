@@ -4,12 +4,11 @@ namespace Diana\Runtime;
 
 use Composer\Autoload\ClassLoader;
 
-use Diana\Cache\Facades;
+use Diana\Cache\Aliases;
 use Diana\Interfaces\Runnable;
 use Diana\IO\Request;
 
 use Diana\Contracts\Kernel;
-use Diana\Support\Debug;
 use Diana\Support\Facades\Facade;
 
 use Diana\Runtime\Traits\Runtime;
@@ -41,7 +40,9 @@ class Application extends Container implements Runnable
 
     protected function provideFacades()
     {
-        $this->resolve(Facades::class)->provide();
+        $cache = $this->resolve(Aliases::class);
+        $cache->cache();
+        $cache->provide();
     }
 
     public static function make(string $path, ClassLoader $classLoader): static

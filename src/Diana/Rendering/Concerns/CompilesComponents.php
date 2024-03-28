@@ -4,9 +4,9 @@ namespace Diana\Rendering\Concerns;
 
 use Diana\Support\Debug;
 use Illuminate\Contracts\Support\CanBeEscapedWhenCastToString;
-use Illuminate\Support\Str;
+use Diana\Support\Helpers\Str;
 use Illuminate\View\AnonymousComponent;
-use Illuminate\View\ComponentAttributeBag;
+use Diana\Rendering\ComponentAttributeBag;
 
 trait CompilesComponents
 {
@@ -69,7 +69,7 @@ trait CompilesComponents
         return implode("\n", [
             '<?php if (isset($component)) { $__componentOriginal' . $hash . ' = $component; } ?>',
             '<?php if (isset($attributes)) { $__attributesOriginal' . $hash . ' = $attributes; } ?>',
-            '<?php $component = ' . $component . '::resolve(' . ($data ?: '[]') . ' + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>',
+            '<?php $component = ' . $component . '::resolve(' . ($data ?: '[]') . ' + (isset($attributes) && $attributes instanceof \Diana\Rendering\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>',
             '<?php $component->withName(' . $alias . '); ?>',
             '<?php if ($component->shouldRender()): ?>',
             '<?php $__env->startComponent($component->resolveView(), $component->data()); ?>',
@@ -158,7 +158,7 @@ trait CompilesComponents
      */
     protected function compileProps($expression)
     {
-        return "<?php \$attributes ??= new \\Illuminate\\View\\ComponentAttributeBag; ?>
+        return "<?php \$attributes ??= new \\Diana\\Rendering\\ComponentAttributeBag; ?>
 <?php foreach(\$attributes->onlyProps{$expression} as \$__key => \$__value) {
     \$\$__key = \$\$__key ?? \$__value;
 } ?>

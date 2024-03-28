@@ -3,6 +3,8 @@
 namespace Diana\Rendering;
 
 use App;
+use Diana\Rendering\Components\Component;
+use Diana\Rendering\Components\DynamicComponent;
 use Diana\Rendering\Engines\CompilerEngine;
 use Diana\Rendering\Engines\FileEngine;
 use Diana\Rendering\Engines\PhpEngine;
@@ -29,6 +31,7 @@ class RenderingPackage extends Package
             false,
             'php'
         );
+        $app->instance(Compiler::class, $compiler);
         $compiler->component('dynamic-component', DynamicComponent::class);
 
         $resolver = new EngineResolver;
